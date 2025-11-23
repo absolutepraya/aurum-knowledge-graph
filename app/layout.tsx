@@ -20,6 +20,8 @@ export const metadata: Metadata = {
 		"Aurum Art Gallery is a knowledge graph of artists and artworks, built mainly with Next.js and Neo4j.",
 };
 
+import { AppHeader } from "@/components/AppHeader";
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -30,7 +32,8 @@ export default function RootLayout({
 			<body
 				className={`${inter.variable} ${playfair.variable} antialiased bg-background text-foreground`}
 			>
-				{children}
+				<AppHeader />
+				<main className="pt-20 min-h-screen">{children}</main>
 			</body>
 		</html>
 	);
