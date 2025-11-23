@@ -59,6 +59,14 @@ export default function Home() {
 
 	return (
 		<main className="relative min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
+			<button
+				type="button"
+				onClick={handleConsoleClick}
+				className="fixed top-4 right-4 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs text-white shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 hover:shadow-lg transition-all"
+				aria-label="Open Cypher Console"
+			>
+				🖥 Console
+			</button>
 			<div className="w-full max-w-3xl relative">
 				<h1 className="text-4xl font-extrabold text-center mb-2 text-slate-800">
 					🏛️ Aurum Art Gallery
@@ -66,17 +74,6 @@ export default function Home() {
 				<p className="text-center text-slate-500 mb-8">
 					Search Artists or Artworks (Example: "Mona Lisa" or "Picasso")
 				</p>
-
-				<div className="flex justify-end mb-4">
-					<button
-						type="button"
-						onClick={handleConsoleClick}
-						className="inline-flex items-center gap-3 px-4 py-2 rounded-xl font-bold text-sm text-white shadow-lg bg-linear-to-r from-green-400 to-blue-500 hover:scale-105 hover:-translate-y-1 transition-all"
-						aria-label="Open Cypher Console"
-					>
-						🖥 Console
-					</button>
-				</div>
 
 				<form onSubmit={handleSearch} className="flex flex-col gap-3 mb-10">
 					<div className="flex gap-3">
