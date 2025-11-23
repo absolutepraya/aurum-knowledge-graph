@@ -104,14 +104,15 @@ export default async function ArtistPage({ params }: PageProps) {
 										<strong className="text-foreground font-medium">
 											School:
 										</strong>{" "}
-										{artist.school}
+										{artist.school.charAt(0).toUpperCase() +
+											artist.school.slice(1)}
 									</span>
 								)}
 							</div>
 
 							<div className="prose prose-invert prose-lg max-w-none mb-10 text-muted-foreground/80 leading-relaxed">
 								<p className="first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:text-primary first-letter:mr-3 first-letter:float-left">
-									{artist.bio}
+									{artist.bio.replace(/ \(listen\)/g, "")}
 								</p>
 							</div>
 
@@ -237,8 +238,8 @@ export default async function ArtistPage({ params }: PageProps) {
 							</p>
 						</div>
 						<div className="flex items-center gap-2 text-xs text-muted-foreground bg-white/5 px-4 py-2 rounded-full border border-white/10">
-							<span className="w-2 h-2 rounded-full bg-blue-500" /> Artist
-							<span className="w-2 h-2 rounded-full bg-orange-500 ml-2" />{" "}
+							<span className="w-2 h-2 rounded-full bg-[#D4AF37]" /> Artist
+							<span className="w-2 h-2 rounded-full bg-[#ededed] ml-2" />{" "}
 							Artwork
 						</div>
 					</div>
