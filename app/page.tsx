@@ -1,7 +1,7 @@
 // app/page.tsx
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { searchGlobal, type GlobalSearchResult } from "./action"; // Import fungsi baru (fixed path)
 import Link from "next/link";
@@ -18,8 +18,6 @@ export default function Home() {
 	const qParam = searchParams.get("q") || "";
 	const [lastQueried, setLastQueried] = useState(""); // track last param we searched for
 	const router = useRouter();
-	const [isAnimatingConsole, setIsAnimatingConsole] = useState(false);
-	const mainRef = useRef<HTMLElement | null>(null);
 	const [useAiSearch, setUseAiSearch] = useState(false);
 
 	const performSearch = useCallback(async (q: string, semantic: boolean) => {
@@ -55,44 +53,12 @@ export default function Home() {
 		await performSearch(query, useAiSearch);
 	};
 
-	const handleConsoleClick = async () => {
-		setIsAnimatingConsole(true);
-
-		const el = mainRef.current;
-		if (el) {
-			const onEnd = (e: TransitionEvent) => {
-				if (
-					e.propertyName &&
-					e.propertyName.indexOf("opacity") === -1 &&
-					e.propertyName.indexOf("transform") === -1
-				)
-					return;
-				el.removeEventListener("transitionend", onEnd);
-				router.push("/console");
-			};
-			el.addEventListener("transitionend", onEnd);
-			// safety fallback
-			setTimeout(() => {
-				try {
-					el.removeEventListener("transitionend", onEnd);
-				} catch {}
-				router.push("/console");
-			}, 1300);
-		} else {
-			setTimeout(() => router.push("/console"), 1300);
-		}
+	const handleConsoleClick = () => {
+		router.push("/console");
 	};
 
 	return (
-		<main
-			ref={mainRef}
-			className={`relative min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans py-8 px-4 sm:py-12 sm:px-6 lg:px-8 transition-all duration-[1200ms] ease-in-out ${isAnimatingConsole ? "opacity-0 scale-90 -translate-y-8 blur-sm pointer-events-none" : "opacity-100 scale-100 translate-y-0 blur-0"}`}
-		>
-			{/* subtle dark overlay to reinforce fade */}
-			<div
-				className={`pointer-events-none fixed inset-0 bg-black transition-opacity duration-[1200ms] ease-in-out ${isAnimatingConsole ? "opacity-60" : "opacity-0"}`}
-			/>
-
+		<main className="relative min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
 			<div className="w-full max-w-3xl relative">
 				<h1 className="text-4xl font-extrabold text-center mb-2 text-slate-800 opacity-9">
 					PROPERTY OF KGTAU
@@ -108,7 +74,7 @@ export default function Home() {
 					<button
 						type="button"
 						onClick={handleConsoleClick}
-						className={`inline-flex items-center gap-3 px-4 py-2 rounded-xl font-bold text-sm text-white shadow-lg bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-[1200ms] ease-out transform ${isAnimatingConsole ? "opacity-0 scale-75 -translate-y-2" : "hover:scale-105 hover:-translate-y-1"}`}
+						className="inline-flex items-center gap-3 px-4 py-2 rounded-xl font-bold text-sm text-white shadow-lg bg-linear-to-r from-green-400 to-blue-500 hover:scale-105 hover:-translate-y-1 transition-all"
 						aria-label="Open Cypher Console"
 					>
 						🖥 Console
