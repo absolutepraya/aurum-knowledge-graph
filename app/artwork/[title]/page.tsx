@@ -1,4 +1,5 @@
 // app/artwork/[title]/page.tsx
+import ArtworkImageViewer from "@/components/ArtworkImageViewer";
 import { getArtworkDetail } from "../../action";
 import Link from "next/link";
 
@@ -94,8 +95,8 @@ export default async function ArtworkPage({ params }: PageProps) {
 						← KEMBALI KE PENCARIAN
 					</Link>
 
-					<div className="flex flex-col md:flex-row gap-8 items-start">
-						<div className="flex-1">
+					<div className="flex flex-col gap-8 items-start">
+						<div className="w-full">
 							<h1 className="text-4xl font-bold mb-2 tracking-tight">
 								{art.title}
 							</h1>
@@ -120,49 +121,22 @@ export default async function ArtworkPage({ params }: PageProps) {
 								</Link>
 							)}
 						</div>
-
-						<div className="w-full md:w-1/3">
-							<div className="aspect-[4/3] bg-slate-100 rounded-lg overflow-hidden mb-3 relative shadow-sm border border-slate-200 group">
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<a
-									href={art.url || placeholder}
-									target="_blank"
-									rel="noopener noreferrer"
-									title="Buka gambar dalam tab baru"
-									className="block w-full h-full"
-								>
-									{/* biome-ignore lint/performance/noImgElement: Next.js Image component is not configured yet */}
-									<img
-										src={art.url || placeholder}
-										alt={art.title}
-										className="object-cover w-full h-full transform transition-transform duration-200 ease-out group-hover:scale-105 cursor-pointer"
-										loading="lazy"
-									/>
-								</a>
-
-								{/* Overlay eye icon: appears on hover or when focused (accessible) */}
-								<div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 scale-95 transition-opacity transition-transform duration-150 ease-out group-hover:opacity-100 group-hover:scale-100 pointer-events-none">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										className="w-12 h-12 text-white"
-									>
-										<title>Lihat gambar</title>
-										<path
-											strokeWidth="1.5"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"
-										/>
-										<circle cx="12" cy="12" r="3" strokeWidth="1.5" />
-									</svg>
-								</div>
-							</div>
-						</div>
 					</div>
 				</div>
+			</div>
+
+			<div className="max-w-6xl mx-auto px-6 py-12">
+				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+					<h2 className="text-2xl font-bold text-slate-800">Pratinjau Karya</h2>
+					<p className="text-sm text-slate-500">
+						Klik gambar untuk memperbesar.
+					</p>
+				</div>
+				<ArtworkImageViewer
+					src={art.url}
+					alt={art.title}
+					placeholder={placeholder}
+				/>
 			</div>
 		</div>
 	);
