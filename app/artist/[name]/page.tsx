@@ -39,6 +39,12 @@ export default async function ArtistPage({ params }: PageProps) {
 
 	// Placeholder to use when artwork URL is missing
 	const placeholder = "https://via.placeholder.com/400x300?text=No+Image";
+	const relationSections = [
+		{ title: "Dipengaruhi oleh", items: artist.influencedBy },
+		{ title: "Mempengaruhi", items: artist.influences },
+		{ title: "Guru", items: artist.mentors },
+		{ title: "Murid", items: artist.students },
+	].filter((section) => section.items.length > 0);
 
 	return (
 		<div className="min-h-screen bg-white text-slate-900">
@@ -104,6 +110,37 @@ export default async function ArtistPage({ params }: PageProps) {
 									Baca selengkapnya di Wikipedia ↗
 								</a>
 							)}
+
+							{relationSections.length > 0 && (
+								<div className="mt-8 w-full">
+									<h3 className="text-lg font-semibold text-white mb-3">
+										Relasi Wikidata
+									</h3>
+									<div className="grid gap-4 sm:grid-cols-2">
+										{relationSections.map((section) => (
+											<div
+												key={section.title}
+												className="bg-slate-800/50 border border-slate-700 rounded-xl p-4"
+											>
+												<p className="text-xs uppercase tracking-wide text-slate-400 mb-3">
+													{section.title}
+												</p>
+												<div className="flex flex-wrap gap-2">
+													{section.items.map((item) => (
+														<Link
+															key={item.name}
+															href={`/artist/${encodeURIComponent(item.name)}`}
+															className="px-3 py-1 rounded-full text-sm bg-white/10 text-white border border-white/20 hover:bg-white/20"
+														>
+															{item.name}
+														</Link>
+													))}
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
@@ -118,7 +155,7 @@ export default async function ArtistPage({ params }: PageProps) {
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
 					{artist.artworks.map((work) => (
 						<div key={work.id || work.title} className="group">
-							<div className="aspect-[4/3] bg-slate-100 rounded-lg overflow-hidden mb-3 relative shadow-sm border border-slate-200">
+							<div className="aspect-4/3 bg-slate-100 rounded-lg overflow-hidden mb-3 relative shadow-sm border border-slate-200">
 								{/* eslint-disable-next-line @next/next/no-img-element */}
 								{/* biome-ignore lint/performance/noImgElement: Next.js Image component is not configured yet */}
 								<img

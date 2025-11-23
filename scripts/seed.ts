@@ -9,7 +9,6 @@ import "dotenv/config";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// 1. Name Normalization Function
 const normalizeName = (rawName: string) => {
 	if (!rawName) return "";
 
@@ -30,7 +29,6 @@ const normalizeName = (rawName: string) => {
 	return formatTitleCase(name);
 };
 
-// Helper to create Title Case
 const formatTitleCase = (str: string) => {
 	return str
 		.split(" ")
@@ -58,11 +56,9 @@ async function main() {
 	console.log(`Password: ${pass}`);
 
 	try {
-		// STEP A: Clean Old Database
 		await session.run("MATCH (n) DETACH DELETE n");
 		console.log("🧹 Old database cleaned.");
 
-		// STEP B: Import artists.csv
 		const artistsPath = path.join(__dirname, "..", "data", "artists.csv");
 		if (fs.existsSync(artistsPath)) {
 			const artistsStream = fs.createReadStream(artistsPath).pipe(csv());
@@ -91,7 +87,6 @@ async function main() {
 			console.warn("⚠️ File 'artists.csv' not found.");
 		}
 
-		// STEP C: Import info_dataset.csv
 		const infoPath = path.join(__dirname, "..", "data", "info_dataset.csv");
 		if (fs.existsSync(infoPath)) {
 			const infoStream = fs.createReadStream(infoPath).pipe(csv());
@@ -124,7 +119,6 @@ async function main() {
 			console.warn("⚠️ File 'info_dataset.csv' not found.");
 		}
 
-		// STEP D: Import artwork_dataset.csv
 		const artworkPath = path.join(
 			__dirname,
 			"..",

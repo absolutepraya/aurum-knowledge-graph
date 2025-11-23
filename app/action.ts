@@ -33,6 +33,10 @@ export interface ArtistDetail {
 		year?: string;
 		info?: string;
 	}[];
+	influencedBy: RelatedArtist[];
+	influences: RelatedArtist[];
+	mentors: RelatedArtist[];
+	students: RelatedArtist[];
 }
 
 // Detail Artwork untuk halaman detail karya
@@ -47,6 +51,10 @@ export interface ArtworkDetail {
 	} | null;
 }
 
+export interface RelatedArtist {
+	name: string;
+	wikidata_id?: string | null;
+}
 interface SearchOptions {
 	semantic?: boolean;
 }
@@ -203,13 +211,25 @@ export async function getArtistDetail(
       MATCH (a:Artist {name: $name})
       OPTIONAL MATCH (a)-[:BELONGS_TO]->(m:Movement)
       OPTIONAL MATCH (a)-[:CREATED]->(w:Artwork)
-      // Hitung jumlah artwork yang terhubung di graph
-      WITH a, m, w
-      // Agregasi data
-      RETURN a, 
-             collect(DISTINCT m.name) AS movements, 
-             count(DISTINCT w) AS graph_painting_count,
-             collect(DISTINCT {id: toString(w.id), title: w.title, url: w.url, info: w.meta_data}) AS artworks
+      OPTIONAL MATCH (a)-[:INFLUENCED_BY]->(influencer:Artist)
+      OPTIONAL MATCH (influenced:Artist)-[:INFLUENCED_BY]->(a)
+      OPTIONAL MATCH (a)-[:STUDENT_OF]->(mentor:Artist)
+      OPTIONAL MATCH (student:Artist)-[:STUDENT_OF]->(a)
+      WITH a,
+           collect(DISTINCT m.name) AS movementNames,
+           collect(DISTINCT w) AS artworksRaw,
+           collect(DISTINCT influencer) AS influencerNodes,
+           collect(DISTINCT influenced) AS influencedNodes,
+           collect(DISTINCT mentor) AS mentorNodes,
+           collect(DISTINCT student) AS studentNodes
+      RETURN a,
+             movementNames AS movements,
+             size(artworksRaw) AS graph_painting_count,
+             [aw IN artworksRaw WHERE aw IS NOT NULL | {id: toString(aw.id), title: aw.title, url: aw.url, info: aw.meta_data}] AS artworks,
+             [node IN influencerNodes WHERE node IS NOT NULL | {name: node.name, wikidata_id: node.wikidata_id}] AS influencedBy,
+             [node IN influencedNodes WHERE node IS NOT NULL | {name: node.name, wikidata_id: node.wikidata_id}] AS influences,
+             [node IN mentorNodes WHERE node IS NOT NULL | {name: node.name, wikidata_id: node.wikidata_id}] AS mentors,
+             [node IN studentNodes WHERE node IS NOT NULL | {name: node.name, wikidata_id: node.wikidata_id}] AS students
     `;
 
 		const result = await session.run(cypher, { name: artistName });
@@ -218,9 +238,7 @@ export async function getArtistDetail(
 
 		const record = result.records[0];
 		const a = record.get("a").properties;
-		const artworks = record
-			.get("artworks")
-			.filter((art: { title: string }) => art.title); // Filter yang kosong jika ada
+		const artworks = record.get("artworks") ?? [];
 
 		// Logika Total Painting:
 		// Prioritas 1: Dari kolom 'paintings' di CSV (jika ada)
@@ -243,7 +261,11 @@ export async function getArtistDetail(
 			paintings_count: totalPaintings,
 			school: a.school,
 			movements: record.get("movements"),
-			artworks: artworks.slice(0, 20), // Ambil max 20 karya untuk preview
+			artworks: artworks.slice(0, 20),
+			influencedBy: record.get("influencedBy") ?? [],
+			influences: record.get("influences") ?? [],
+			mentors: record.get("mentors") ?? [],
+			students: record.get("students") ?? [],
 		};
 	} catch (error) {
 		console.error("Detail Artist Error:", error);
