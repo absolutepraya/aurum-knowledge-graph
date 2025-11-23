@@ -57,9 +57,9 @@ export default function Home() {
 	};
 
 	return (
-		<main className="relative min-h-screen flex flex-col items-center justify-start bg-background text-foreground font-sans overflow-hidden">
+		<main className="relative min-h-screen flex flex-col items-center justify-start bg-background text-foreground font-sans">
 			{/* Background Animation */}
-			<div className="absolute inset-0 z-0 overflow-hidden">
+			<div className="absolute top-0 left-0 w-full h-screen z-0 overflow-hidden pointer-events-none">
 				<div
 					className="absolute inset-0 bg-cover bg-center opacity-20 animate-pan-slow"
 					style={{
@@ -67,7 +67,7 @@ export default function Home() {
 							"url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg')",
 					}}
 				/>
-				<div className="absolute inset-0 bg-gradient-to-b from-background via-background/0 to-background" />
+				<div className="absolute inset-0 bg-linear-to-b from-background via-background/20 to-background" />
 			</div>
 
 			{/* Console Button */}
@@ -92,11 +92,11 @@ export default function Home() {
 				</p>
 
 				{/* Search Bar */}
-				<form onSubmit={handleSearch} className="w-full max-w-2xl mb-16">
+				<form onSubmit={handleSearch} className="w-full max-w-4xl mb-16">
 					<div className="relative group">
 						<div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
-						<div className="relative flex items-center bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5 focus-within:ring-primary/50 transition-all">
-							<Search className="absolute left-6 w-6 h-6 text-muted-foreground" />
+						<div className="relative flex items-center bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5 focus-within:ring-primary/50 transition-all pr-1 py-0.5">
+							<Search className="absolute left-5.5 w-6 h-6 text-muted-foreground" />
 							<input
 								type="text"
 								value={query}
@@ -107,7 +107,7 @@ export default function Home() {
 							<button
 								type="submit"
 								disabled={isLoading}
-								className="px-8 py-5 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors border-l border-white/5"
+								className="px-8 py-5 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors border-l border-white/5 rounded-xl"
 							>
 								{isLoading ? (
 									<span className="animate-pulse">Searching...</span>
