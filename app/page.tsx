@@ -97,7 +97,7 @@ function SearchContent() {
 
 			<div className="w-full max-w-5xl relative z-10 px-6 pt-32 pb-16 flex flex-col items-center">
 				{/* Hero Title */}
-				<h1 className="text-6xl md:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 drop-shadow-2xl">
+				<h1 className="text-6xl md:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 drop-shadow-2xl">
 					Aurum Art Gallery
 				</h1>
 				<p className="text-center text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl font-light tracking-wide">
@@ -108,7 +108,7 @@ function SearchContent() {
 				{/* Search Bar */}
 				<form onSubmit={handleSearch} className="w-full max-w-4xl mb-16">
 					<div className="relative group">
-						<div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+						<div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
 						<div className="relative flex items-center bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5 focus-within:ring-primary/50 transition-all pr-1 py-0.5">
 							<Search className="absolute left-5.5 w-6 h-6 text-muted-foreground" />
 							<input
@@ -138,7 +138,7 @@ function SearchContent() {
 							{/* Filter Dropdown */}
 							<div className="flex items-center gap-2 bg-card/30 backdrop-blur-md border border-white/10 rounded-lg p-1 pl-3">
 								<ListFilter className="w-4 h-4 text-muted-foreground" />
-								<div className="h-4 w-[1px] bg-white/10 mx-1" />
+								<div className="h-4 w-px bg-white/10 mx-1" />
 								{(["all", "artist", "artwork"] as const).map((f) => (
 									<button
 										key={f}
@@ -161,7 +161,7 @@ function SearchContent() {
 							{/* Sort Dropdown */}
 							<div className="flex items-center gap-2 bg-card/30 backdrop-blur-md border border-white/10 rounded-lg p-1 pl-3">
 								<ArrowDownNarrowWide className="w-4 h-4 text-muted-foreground" />
-								<div className="h-4 w-[1px] bg-white/10 mx-1" />
+								<div className="h-4 w-px bg-white/10 mx-1" />
 								{(["relevance", "az", "za"] as const).map((s) => (
 									<button
 										key={s}
@@ -222,7 +222,7 @@ function SearchContent() {
 						>
 							<div className="p-6 flex items-start gap-4">
 								<div
-									className={`w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full text-xl border border-white/10 ${
+									className={`w-12 h-12 shrink-0 flex items-center justify-center rounded-full text-xl border border-white/10 ${
 										item.type === "artist"
 											? "bg-blue-500/10 text-blue-400"
 											: "bg-orange-500/10 text-orange-400"

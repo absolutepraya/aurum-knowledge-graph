@@ -57,7 +57,7 @@ export default async function ArtistPage({ params }: PageProps) {
 			{/* Header Section */}
 			<div className="relative w-full bg-card border-b border-white/5 overflow-hidden">
 				{/* Abstract Background Pattern */}
-				<div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary via-background to-background" />
+				<div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-primary via-background to-background" />
 
 				<div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
 					<Link
@@ -139,7 +139,7 @@ export default async function ArtistPage({ params }: PageProps) {
 
 						{/* Relations Sidebar */}
 						{relationSections.length > 0 && (
-							<div className="w-full lg:w-80 flex-shrink-0 space-y-6">
+							<div className="w-full lg:w-80 shrink-0 space-y-6">
 								<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
 									Connections
 								</h3>
@@ -206,7 +206,7 @@ export default async function ArtistPage({ params }: PageProps) {
 											className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
 											loading="lazy"
 										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+										<div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
 											<h3 className="text-xl font-bold text-white mb-1 font-serif">
 												{toTitleCase(work.title)}
 											</h3>
