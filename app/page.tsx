@@ -60,11 +60,8 @@ export default function Home() {
 	return (
 		<main className="relative min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
 			<div className="w-full max-w-3xl relative">
-				<h1 className="text-4xl font-extrabold text-center mb-2 text-slate-800 opacity-9">
-					PROPERTY OF KGTAU
-				</h1>
 				<h1 className="text-4xl font-extrabold text-center mb-2 text-slate-800">
-					🏛️ Art History Gallery
+					🏛️ Aurum Art Gallery
 				</h1>
 				<p className="text-center text-slate-500 mb-8">
 					Search Artists or Artworks (Example: "Mona Lisa" or "Picasso")
@@ -152,6 +149,9 @@ export default function Home() {
 							No results found for "{lastSearchedQuery || query}".
 						</div>
 					)}
+				</div>
+				<div className="mt-12 text-center">
+					<p className="text-xs text-slate-400">PROPERTY OF KGTAU</p>
 				</div>
 			</div>
 		</main>
