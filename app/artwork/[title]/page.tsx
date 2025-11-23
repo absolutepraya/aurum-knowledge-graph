@@ -91,6 +91,13 @@ export default async function ArtworkPage({ params }: PageProps) {
 	const yearFromMeta = parseYearFromMeta(art.meta_data || undefined);
 	const infoFromMeta = parseInfoFromMeta(art.meta_data || undefined);
 
+	const toTitleCase = (str: string) => {
+		return str.replace(
+			/\w\S*/g,
+			(txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+		);
+	};
+
 	return (
 		<div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
 			<div className="bg-card border-b border-white/5 py-16 px-6">
@@ -106,7 +113,7 @@ export default async function ArtworkPage({ params }: PageProps) {
 					<div className="flex flex-col gap-8 items-start">
 						<div className="w-full">
 							<h1 className="text-4xl font-serif font-bold mb-2 tracking-tight text-foreground">
-								{art.title}
+								{toTitleCase(art.title)}
 							</h1>
 							<p className="text-lg text-muted-foreground mb-4">
 								{yearFromMeta ? `${yearFromMeta}` : ""}{" "}
@@ -116,7 +123,9 @@ export default async function ArtworkPage({ params }: PageProps) {
 
 							<div className="prose prose-invert max-w-none">
 								<p className="text-muted-foreground/80 leading-relaxed text-lg">
-									{infoFromMeta || "No description available."}
+									{infoFromMeta
+										? toTitleCase(infoFromMeta)
+										: "No description available."}
 								</p>
 							</div>
 

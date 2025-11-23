@@ -182,38 +182,51 @@ export default async function ArtistPage({ params }: PageProps) {
 
 				{artist.artworks.length > 0 ? (
 					<div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
-						{artist.artworks.map((work) => (
-							<div
-								key={work.id || work.title}
-								className="break-inside-avoid group relative bg-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-							>
-								<div className="relative">
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									{/* biome-ignore lint/performance/noImgElement: Next.js Image component is not configured yet */}
-									<img
-										src={work.url || placeholder}
-										alt={work.title}
-										className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-										loading="lazy"
-									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-										<h3 className="text-xl font-bold text-white mb-1 font-serif">
-											{work.title}
+						{artist.artworks.map((work) => {
+							const toTitleCase = (str: string) => {
+								return str.replace(
+									/\w\S*/g,
+									(txt) =>
+										txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
+								);
+							};
+
+							return (
+								<Link
+									key={work.id || work.title}
+									href={`/artwork/${encodeURIComponent(work.id)}`}
+									className="break-inside-avoid group relative bg-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 block"
+								>
+									<div className="relative">
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										{/* biome-ignore lint/performance/noImgElement: Next.js Image component is not configured yet */}
+										<img
+											src={work.url || placeholder}
+											alt={work.title}
+											className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+											loading="lazy"
+										/>
+										<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+											<h3 className="text-xl font-bold text-white mb-1 font-serif">
+												{toTitleCase(work.title)}
+											</h3>
+											<p className="text-sm text-gray-300 line-clamp-2">
+												{work.info ? toTitleCase(work.info) : ""}
+											</p>
+										</div>
+									</div>
+									{/* Mobile/Default view info (visible when not hovering on desktop, or always visible) */}
+									<div className="p-4 bg-card border-t border-white/5 lg:hidden">
+										<h3 className="font-bold text-foreground">
+											{toTitleCase(work.title)}
 										</h3>
-										<p className="text-sm text-gray-300 line-clamp-2">
-											{work.info}
+										<p className="text-xs text-muted-foreground mt-1">
+											{work.info ? toTitleCase(work.info) : ""}
 										</p>
 									</div>
-								</div>
-								{/* Mobile/Default view info (visible when not hovering on desktop, or always visible) */}
-								<div className="p-4 bg-card border-t border-white/5 lg:hidden">
-									<h3 className="font-bold text-foreground">{work.title}</h3>
-									<p className="text-xs text-muted-foreground mt-1">
-										{work.info}
-									</p>
-								</div>
-							</div>
-						))}
+								</Link>
+							);
+						})}
 					</div>
 				) : (
 					<div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
