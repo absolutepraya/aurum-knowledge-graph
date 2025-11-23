@@ -49,90 +49,182 @@ export default function ConsolePage() {
 
 	return (
 		<div
-			className={`min-h-screen bg-slate-900 text-slate-200 p-8 font-mono transition-all duration-[1200ms] ease-in-out ${entered ? "opacity-100 translate-y-0 scale-100 blur-0" : "opacity-0 translate-y-4 scale-95 blur-sm"}`}
+			className={`min-h-screen bg-background text-foreground font-sans transition-all duration-[1200ms] ease-in-out selection:bg-primary/30 ${
+				entered
+					? "opacity-100 translate-y-0 scale-100 blur-0"
+					: "opacity-0 translate-y-4 scale-95 blur-sm"
+			}`}
 		>
-			<div className="max-w-5xl mx-auto">
+			{/* Background Elements */}
+			<div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+				<div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
+			</div>
+
+			<div className="relative z-10 max-w-6xl mx-auto p-6 lg:p-12">
 				{/* Header */}
-				<div className="flex justify-between items-center mb-6">
-					<h1 className="text-2xl font-bold text-green-400 flex items-center gap-2">
-						<Terminal className="w-6 h-6" />
-						KGTAU Cypher Console (KELAZOOOO)
-					</h1>
-					<Link
-						href="/"
-						className="text-sm text-slate-400 hover:text-white underline flex items-center gap-1"
-					>
-						<ArrowLeft className="w-4 h-4" />
-						Back to Search UI
-					</Link>
-				</div>
-
-				{/* Input Area (Terminal Box) */}
-				<div className="mb-4">
-					<label
-						htmlFor="cypher-query"
-						className="block text-xs text-slate-500 mb-2 uppercase tracking-wider"
-					>
-						Enter Cypher Query:
-					</label>
-					<textarea
-						id="cypher-query"
-						value={query}
-						onChange={(e) => setQuery(e.target.value)}
-						className="w-full h-40 bg-slate-800 border border-slate-700 rounded p-4 text-green-300 focus:outline-none focus:border-green-500 transition-colors"
-						spellCheck={false}
-					/>
-				</div>
-
-				{/* Action Button */}
-				<div className="flex justify-end mb-8">
-					<button
-						type="button"
-						onClick={handleRun}
-						disabled={isLoading}
-						className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{isLoading ? "Executing..." : "Run Query"}
-					</button>
-				</div>
-
-				{/* Result Area */}
-				<div className="bg-black rounded border border-slate-700 p-4 overflow-x-auto">
-					<div className="flex justify-between mb-2 border-b border-slate-800 pb-2">
-						<span className="text-xs text-slate-500">RESULT OUTPUT</span>
-						{isError && (
-							<span className="text-xs text-red-500 font-bold">FAILED</span>
-						)}
-						{!isError && !isLoading && result && (
-							<span className="text-xs text-green-500 font-bold">SUCCESS</span>
-						)}
+				<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+					<div>
+						<Link
+							href="/"
+							className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-4 group"
+						>
+							<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+							BACK TO SEARCH
+						</Link>
+						<h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground flex items-center gap-3 tracking-tight">
+							<Terminal className="w-8 h-8 text-primary" />
+							Cypher Console
+						</h1>
+						<p className="text-muted-foreground mt-2 max-w-xl">
+							Execute raw Cypher queries against the Knowledge Graph. Use with
+							caution.
+						</p>
 					</div>
-					<pre
-						className={`text-sm ${isError ? "text-red-400" : "text-slate-300"}`}
-					>
-						{result || "// Output will appear here..."}
-					</pre>
 				</div>
 
-				{/* Cheat Sheet (Opsional, biar dosen lihat) */}
-				<div className="mt-8 p-4 bg-slate-800/50 rounded text-xs text-slate-400">
-					<p className="font-bold text-slate-300 mb-2">Example Queries:</p>
-					<ul className="list-disc pl-5 space-y-1">
-						<li>
-							<code>MATCH (a:Artist) RETURN a.name, a.nationality LIMIT 5</code>
-						</li>
-						<li>
-							<code>
-								MATCH (a:Artist)-[:CREATED]-&gt;(w:Artwork) WHERE a.name
-								CONTAINS &apos;Vinci&apos; RETURN w.title
-							</code>
-						</li>
-						<li>
-							<code>
-								MATCH (n) RETURN labels(n) as Label, count(n) as Total
-							</code>
-						</li>
-					</ul>
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+					{/* Left Column: Input */}
+					<div className="lg:col-span-2 space-y-6">
+						<div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl p-1 shadow-2xl">
+							<div className="bg-black/50 rounded-xl overflow-hidden">
+								<div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+									<span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+										Query Editor
+									</span>
+									<div className="flex gap-1.5">
+										<div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50" />
+										<div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+										<div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50" />
+									</div>
+								</div>
+								<textarea
+									id="cypher-query"
+									value={query}
+									onChange={(e) => setQuery(e.target.value)}
+									className="w-full h-64 bg-transparent p-4 font-mono text-sm text-primary placeholder:text-muted-foreground/30 focus:outline-none resize-none leading-relaxed"
+									spellCheck={false}
+									placeholder="// Enter your Cypher query here..."
+								/>
+							</div>
+						</div>
+
+						<div className="flex justify-end">
+							<button
+								type="button"
+								onClick={handleRun}
+								disabled={isLoading}
+								className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{isLoading ? (
+									<>
+										<span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+										Executing...
+									</>
+								) : (
+									<>
+										<Terminal className="w-4 h-4" />
+										Run Query
+									</>
+								)}
+							</button>
+						</div>
+
+						{/* Result Area */}
+						<div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+							<div className="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-white/5">
+								<span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+									Output
+								</span>
+								{isError && (
+									<span className="text-xs text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+										FAILED
+									</span>
+								)}
+								{!isError && !isLoading && result && (
+									<span className="text-xs text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">
+										SUCCESS
+									</span>
+								)}
+							</div>
+							<div className="p-0 overflow-x-auto bg-black/50 min-h-[200px] max-h-[500px]">
+								<pre
+									className={`p-6 font-mono text-xs leading-relaxed ${
+										isError ? "text-red-400" : "text-muted-foreground"
+									}`}
+								>
+									{result || "// Results will appear here..."}
+								</pre>
+							</div>
+						</div>
+					</div>
+
+					{/* Right Column: Sidebar/Cheatsheet */}
+					<div className="space-y-6">
+						<div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+							<h3 className="font-serif font-bold text-lg text-foreground mb-4 border-b border-white/5 pb-2">
+								Example Queries
+							</h3>
+							<div className="space-y-4">
+								<div className="group">
+									<p className="text-xs text-muted-foreground mb-1.5 font-medium">
+										List Artists
+									</p>
+									<button
+										type="button"
+										onClick={() =>
+											setQuery(
+												"MATCH (a:Artist) RETURN a.name, a.nationality LIMIT 5",
+											)
+										}
+										className="w-full text-left p-3 rounded-lg bg-black/40 border border-white/5 text-xs font-mono text-primary/80 hover:text-primary hover:border-primary/30 transition-all"
+									>
+										MATCH (a:Artist) RETURN a.name...
+									</button>
+								</div>
+								<div className="group">
+									<p className="text-xs text-muted-foreground mb-1.5 font-medium">
+										Find Artworks by Name
+									</p>
+									<button
+										type="button"
+										onClick={() =>
+											setQuery(
+												"MATCH (a:Artist)-[:CREATED]->(w:Artwork) WHERE a.name CONTAINS 'Vinci' RETURN w.title",
+											)
+										}
+										className="w-full text-left p-3 rounded-lg bg-black/40 border border-white/5 text-xs font-mono text-primary/80 hover:text-primary hover:border-primary/30 transition-all"
+									>
+										MATCH (a:Artist)-[:CREATED]...
+									</button>
+								</div>
+								<div className="group">
+									<p className="text-xs text-muted-foreground mb-1.5 font-medium">
+										Graph Statistics
+									</p>
+									<button
+										type="button"
+										onClick={() =>
+											setQuery(
+												"MATCH (n) RETURN labels(n) as Label, count(n) as Total",
+											)
+										}
+										className="w-full text-left p-3 rounded-lg bg-black/40 border border-white/5 text-xs font-mono text-primary/80 hover:text-primary hover:border-primary/30 transition-all"
+									>
+										MATCH (n) RETURN labels(n)...
+									</button>
+								</div>
+							</div>
+						</div>
+
+						<div className="bg-primary/5 border border-primary/10 rounded-2xl p-6">
+							<h3 className="font-bold text-sm text-primary mb-2">Pro Tip</h3>
+							<p className="text-xs text-muted-foreground leading-relaxed">
+								Use <code className="text-primary">LIMIT</code> to avoid
+								overwhelming the browser with too many results. The graph
+								database contains thousands of nodes.
+							</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
