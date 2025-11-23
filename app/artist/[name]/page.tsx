@@ -2,6 +2,7 @@
 import GraphViz from "@/components/GraphViz";
 import { getArtistDetail, getArtistGraphData } from "../../action";
 import Link from "next/link";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 // PENTING: Di Next.js 15, params adalah Promise
 interface PageProps {
@@ -63,9 +64,7 @@ export default async function ArtistPage({ params }: PageProps) {
 						href="/"
 						className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-12 group"
 					>
-						<span className="group-hover:-translate-x-1 transition-transform">
-							←
-						</span>
+						<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
 						BACK TO SEARCH
 					</Link>
 
@@ -124,7 +123,7 @@ export default async function ArtistPage({ params }: PageProps) {
 										rel="noopener noreferrer"
 										className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all hover:border-primary/50 hover:text-primary"
 									>
-										Read on Wikipedia ↗
+										Read on Wikipedia <ExternalLink className="w-4 h-4" />
 									</a>
 								)}
 							</div>

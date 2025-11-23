@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { searchGlobal, type GlobalSearchResult } from "./action";
 import Link from "next/link";
+import { Terminal, Search, User, Palette, Sparkles } from "lucide-react";
 
 export default function Home() {
 	const [query, setQuery] = useState("");
@@ -66,7 +67,7 @@ export default function Home() {
 							"url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg')",
 					}}
 				/>
-				<div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
+				<div className="absolute inset-0 bg-gradient-to-b from-background via-background/0 to-background" />
 			</div>
 
 			{/* Console Button */}
@@ -76,7 +77,8 @@ export default function Home() {
 				className="fixed top-6 right-6 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-xs text-primary-foreground bg-primary/90 hover:bg-primary shadow-lg hover:shadow-primary/20 transition-all backdrop-blur-sm"
 				aria-label="Open Cypher Console"
 			>
-				🖥 Console
+				<Terminal className="w-4 h-4" />
+				Console
 			</button>
 
 			<div className="w-full max-w-5xl relative z-10 px-6 pt-32 pb-16 flex flex-col items-center">
@@ -94,12 +96,13 @@ export default function Home() {
 					<div className="relative group">
 						<div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
 						<div className="relative flex items-center bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5 focus-within:ring-primary/50 transition-all">
+							<Search className="absolute left-6 w-6 h-6 text-muted-foreground" />
 							<input
 								type="text"
 								value={query}
 								onChange={(e) => setQuery(e.target.value)}
 								placeholder="Search for 'Van Gogh', 'Impressionism'..."
-								className="flex-1 bg-transparent px-6 py-5 text-lg text-foreground placeholder:text-muted-foreground/50 outline-none"
+								className="flex-1 bg-transparent pl-16 pr-6 py-5 text-lg text-foreground placeholder:text-muted-foreground/50 outline-none"
 							/>
 							<button
 								type="submit"
@@ -125,7 +128,10 @@ export default function Home() {
 								/>
 								<div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary" />
 							</div>
-							<span>Enable AI Semantic Search (Beta)</span>
+							<span className="flex items-center gap-2">
+								<Sparkles className="w-4 h-4 text-primary" />
+								Enable AI Semantic Search (Beta)
+							</span>
 						</label>
 					</div>
 				</form>
@@ -150,7 +156,11 @@ export default function Home() {
 											: "bg-orange-500/10 text-orange-400"
 									}`}
 								>
-									{item.type === "artist" ? "👤" : "🎨"}
+									{item.type === "artist" ? (
+										<User className="w-6 h-6" />
+									) : (
+										<Palette className="w-6 h-6" />
+									)}
 								</div>
 								<div className="flex-1 min-w-0">
 									<div className="flex items-center justify-between gap-2 mb-1">

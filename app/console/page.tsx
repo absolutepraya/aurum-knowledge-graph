@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { ArrowLeft, Terminal } from "lucide-react";
 
 export default function ConsolePage() {
 	const [query, setQuery] = useState("MATCH (n) RETURN n LIMIT 5"); // Default query
@@ -53,14 +54,16 @@ export default function ConsolePage() {
 			<div className="max-w-5xl mx-auto">
 				{/* Header */}
 				<div className="flex justify-between items-center mb-6">
-					<h1 className="text-2xl font-bold text-green-400">
-						&gt; KGTAU Cypher Console (KELAZOOOO)
+					<h1 className="text-2xl font-bold text-green-400 flex items-center gap-2">
+						<Terminal className="w-6 h-6" />
+						KGTAU Cypher Console (KELAZOOOO)
 					</h1>
 					<Link
 						href="/"
-						className="text-sm text-slate-400 hover:text-white underline"
+						className="text-sm text-slate-400 hover:text-white underline flex items-center gap-1"
 					>
-						← Back to Search UI
+						<ArrowLeft className="w-4 h-4" />
+						Back to Search UI
 					</Link>
 				</div>
 

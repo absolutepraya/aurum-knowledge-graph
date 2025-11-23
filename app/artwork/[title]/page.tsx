@@ -2,6 +2,7 @@
 import ArtworkImageViewer from "@/components/ArtworkImageViewer";
 import { getArtworkDetail } from "../../action";
 import Link from "next/link";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 interface PageProps {
 	params: Promise<{ title: string }>;
@@ -15,14 +16,19 @@ export default async function ArtworkPage({ params }: PageProps) {
 
 	if (!art) {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-800">
-				<div className="text-center">
-					<h1 className="text-2xl font-bold mb-2">Data not found 😔</h1>
-					<p className="mb-4">
+			<div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+				<div className="text-center p-8 bg-card border border-border rounded-xl shadow-2xl">
+					<h1 className="text-3xl font-serif font-bold mb-4 text-primary">
+						Artwork Not Found
+					</h1>
+					<p className="mb-6 text-muted-foreground">
 						Sorry, we could not find an artwork with the title &quot;
 						{artworkTitle}&quot;.
 					</p>
-					<Link href="/" className="text-blue-600 hover:underline">
+					<Link
+						href="/"
+						className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors"
+					>
 						Back to Search
 					</Link>
 				</div>
@@ -86,29 +92,30 @@ export default async function ArtworkPage({ params }: PageProps) {
 	const infoFromMeta = parseInfoFromMeta(art.meta_data || undefined);
 
 	return (
-		<div className="min-h-screen bg-white text-slate-900">
-			<div className="bg-slate-900 text-white py-16 px-6">
+		<div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
+			<div className="bg-card border-b border-white/5 py-16 px-6">
 				<div className="max-w-4xl mx-auto">
 					<Link
 						href="/"
-						className="text-slate-400 hover:text-white mb-6 inline-block text-sm font-medium"
+						className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-6 group"
 					>
-						← BACK TO SEARCH
+						<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+						BACK TO SEARCH
 					</Link>
 
 					<div className="flex flex-col gap-8 items-start">
 						<div className="w-full">
-							<h1 className="text-4xl font-bold mb-2 tracking-tight">
+							<h1 className="text-4xl font-serif font-bold mb-2 tracking-tight text-foreground">
 								{art.title}
 							</h1>
-							<p className="text-lg text-slate-400 mb-4">
+							<p className="text-lg text-muted-foreground mb-4">
 								{yearFromMeta ? `${yearFromMeta}` : ""}{" "}
 								{art.artist ? `• by ${art.artist.name}` : ""}{" "}
 								{museumName ? `• at ${museumName}` : ""}
 							</p>
 
 							<div className="prose prose-invert max-w-none">
-								<p className="text-slate-300 leading-relaxed text-lg">
+								<p className="text-muted-foreground/80 leading-relaxed text-lg">
 									{infoFromMeta || "No description available."}
 								</p>
 							</div>
@@ -116,9 +123,10 @@ export default async function ArtworkPage({ params }: PageProps) {
 							{art.artist && (
 								<Link
 									href={`/artist/${encodeURIComponent(art.artist.name)}`}
-									className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm"
+									className="inline-flex items-center gap-2 mt-4 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
 								>
-									View {art.artist.name}&apos;s profile ↗
+									View {art.artist.name}&apos;s profile{" "}
+									<ExternalLink className="w-4 h-4" />
 								</Link>
 							)}
 						</div>
