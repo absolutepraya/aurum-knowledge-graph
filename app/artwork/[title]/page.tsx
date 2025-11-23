@@ -99,60 +99,111 @@ export default async function ArtworkPage({ params }: PageProps) {
 	};
 
 	return (
-		<div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
-			<div className="bg-card border-b border-white/5 py-16 px-6">
-				<div className="max-w-4xl mx-auto">
-					<Link
-						href="/"
-						className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-6 group"
-					>
-						<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-						BACK TO SEARCH
-					</Link>
+		<div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 flex flex-col">
+			{/* Blurred Background */}
+			<div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+				<div
+					className="absolute inset-0 bg-cover bg-center opacity-10 blur-3xl scale-110"
+					style={{
+						backgroundImage: `url('${art.url || placeholder}')`,
+					}}
+				/>
+				<div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+			</div>
 
-					<div className="flex flex-col gap-8 items-start">
-						<div className="w-full">
-							<h1 className="text-4xl font-serif font-bold mb-2 tracking-tight text-foreground">
+			<div className="relative z-10 max-w-7xl mx-auto w-full px-6 py-12 lg:py-20 flex-1 flex flex-col">
+				<Link
+					href="/"
+					className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-12 group w-fit"
+				>
+					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+					BACK TO SEARCH
+				</Link>
+
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+					{/* Left Column: Artwork Image */}
+					<div className="w-full lg:sticky lg:top-24">
+						<div className="relative group rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-card/5 backdrop-blur-sm">
+							<ArtworkImageViewer
+								src={art.url}
+								alt={art.title}
+								placeholder={placeholder}
+							/>
+						</div>
+						<p className="text-center text-xs text-muted-foreground mt-4 opacity-60">
+							Click image to zoom
+						</p>
+					</div>
+
+					{/* Right Column: Details */}
+					<div className="flex flex-col space-y-8">
+						<div>
+							<div className="flex items-center gap-3 mb-4">
+								<span className="px-3 py-1 rounded-full border border-primary/30 text-primary text-xs uppercase tracking-widest font-bold bg-primary/5">
+									Artwork
+								</span>
+								{yearFromMeta && (
+									<span className="px-3 py-1 rounded-full border border-white/10 text-muted-foreground text-xs uppercase tracking-widest bg-white/5">
+										{yearFromMeta}
+									</span>
+								)}
+							</div>
+
+							<h1 className="text-5xl md:text-6xl font-serif font-bold mb-6 tracking-tight text-foreground leading-tight">
 								{toTitleCase(art.title)}
 							</h1>
-							<p className="text-lg text-muted-foreground mb-4">
-								{yearFromMeta ? `${yearFromMeta}` : ""}{" "}
-								{art.artist ? `• by ${art.artist.name}` : ""}{" "}
-								{museumName ? `• at ${museumName}` : ""}
-							</p>
-
-							<div className="prose prose-invert max-w-none">
-								<p className="text-muted-foreground/80 leading-relaxed text-lg">
-									{infoFromMeta
-										? toTitleCase(infoFromMeta)
-										: "No description available."}
-								</p>
-							</div>
 
 							{art.artist && (
 								<Link
 									href={`/artist/${encodeURIComponent(art.artist.name)}`}
-									className="inline-flex items-center gap-2 mt-4 text-primary hover:text-primary/80 text-sm font-medium transition-colors"
+									className="inline-flex items-center gap-2 text-xl text-muted-foreground hover:text-primary transition-colors border-b border-transparent hover:border-primary/50 pb-0.5"
 								>
-									View {art.artist.name}&apos;s profile{" "}
+									By <span className="text-foreground">{art.artist.name}</span>
 									<ExternalLink className="w-4 h-4" />
 								</Link>
 							)}
 						</div>
+
+						<div className="h-px w-full bg-white/10" />
+
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							{museumName && (
+								<div>
+									<h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-1 font-bold">
+										Location
+									</h3>
+									<p className="text-foreground font-medium">
+										{toTitleCase(museumName)}
+									</p>
+								</div>
+							)}
+							{infoFromMeta && (
+								<div className="col-span-1 md:col-span-2">
+									<h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-1 font-bold">
+										Details
+									</h3>
+									<p className="text-foreground/80 leading-relaxed">
+										{toTitleCase(infoFromMeta)}
+									</p>
+								</div>
+							)}
+						</div>
+
+						<div className="h-px w-full bg-white/10" />
+
+						{/* Additional Actions or Info could go here */}
+						<div className="bg-card/30 border border-white/5 rounded-xl p-6 backdrop-blur-md">
+							<h3 className="font-serif font-bold text-lg mb-2 text-primary">
+								About this Piece
+							</h3>
+							<p className="text-sm text-muted-foreground leading-relaxed">
+								This artwork is part of our extensive collection. Explore more
+								works by {art.artist?.name || "this artist"} to understand the
+								context and movement it belongs to.
+							</p>
+						</div>
 					</div>
 				</div>
-			</div>
-
-			<div className="max-w-6xl mx-auto px-6 py-12">
-				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-					<h2 className="text-2xl font-bold text-slate-800">Artwork Preview</h2>
-					<p className="text-sm text-slate-500">Click image to enlarge.</p>
-				</div>
-				<ArtworkImageViewer
-					src={art.url}
-					alt={art.title}
-					placeholder={placeholder}
-				/>
 			</div>
 		</div>
 	);

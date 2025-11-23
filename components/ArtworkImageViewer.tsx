@@ -24,7 +24,7 @@ export default function ArtworkImageViewer({
 					alt={alt}
 					width={1200}
 					height={900}
-					className="w-full h-auto object-cover rounded-xl border border-slate-200 shadow-sm"
+					className="w-full h-auto object-contain rounded-xl border border-white/10 shadow-2xl bg-black/20"
 					unoptimized
 				/>
 			</Zoom>
