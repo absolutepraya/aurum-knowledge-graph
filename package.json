@@ -7,9 +7,9 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint",
-		"seed": "npx tsx scripts/seed.ts",
-		"embed": "npx tsx scripts/generate-embeddings.ts",
-		"enrich": "npx tsx scripts/enrich-data.ts",
+		"seed": "bun run scripts/seed.ts",
+		"embed": "bun run scripts/generate-embeddings.ts",
+		"enrich": "bun run scripts/enrich-data.ts",
 		"check": "biome check .",
 		"format": "biome format .",
 		"prepare": "husky"

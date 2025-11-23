@@ -1,20 +1,22 @@
-"use server";
-
 import "dotenv/config";
 import neo4j, { int, type Session } from "neo4j-driver";
+import { WBK } from "wikibase-sdk";
 
-const WIKIDATA_ENDPOINT =
+const WIKIDATA_INSTANCE =
+	process.env.WIKIDATA_INSTANCE || "https://www.wikidata.org";
+const WIKIDATA_SPARQL_ENDPOINT =
 	process.env.WIKIDATA_ENDPOINT || "https://query.wikidata.org/sparql";
 const USER_AGENT =
 	process.env.WIKIDATA_USER_AGENT ||
 	"HistoricArtKnowledgeGraph/1.0 (assignment@example.com)";
-const FETCH_DELAY_MS = Number(process.env.WIKIDATA_DELAY_MS || 1200);
+const FETCH_DELAY_MS = Number(process.env.WIKIDATA_DELAY_MS || 500);
 const ARTIST_BATCH_SIZE = Number(process.env.WIKIDATA_BATCH || 10);
 const RELATION_LIMIT = Number(process.env.WIKIDATA_REL_LIMIT || 5);
 
-type SparqlBinding = {
-	[key: string]: { type: string; value: string } | undefined;
-};
+const wbk = WBK({
+	instance: WIKIDATA_INSTANCE,
+	sparqlEndpoint: WIKIDATA_SPARQL_ENDPOINT,
+});
 
 interface WikidataMatch {
 	id: string;
@@ -30,7 +32,7 @@ interface RelationResult {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function runSparql(query: string) {
-	const url = `${WIKIDATA_ENDPOINT}?format=json&query=${encodeURIComponent(query)}`;
+	const url = wbk.sparqlQuery(query);
 	const response = await fetch(url, {
 		headers: {
 			Accept: "application/sparql-results+json",
@@ -47,37 +49,75 @@ async function runSparql(query: string) {
 	return payload;
 }
 
+function generateNameVariations(name: string): string[] {
+	const sanitized = name.replace(/"/g, "").trim();
+	const variations = new Set<string>([sanitized]);
+
+	const words = sanitized.split(/\s+/);
+	if (words.length > 1) {
+		const reversed = [...words].reverse().join(" ");
+		variations.add(reversed);
+
+		const lastWord = words[words.length - 1];
+		const firstWords = words.slice(0, -1).join(" ");
+		if (lastWord && firstWords) {
+			variations.add(`${lastWord}, ${firstWords}`);
+		}
+	}
+
+	const withoutThe = sanitized.replace(/\bthe\b/gi, "").trim();
+	if (withoutThe !== sanitized && withoutThe.length > 0) {
+		variations.add(withoutThe);
+	}
+
+	return Array.from(variations);
+}
+
 async function fetchWikidataId(
 	artistName: string,
 ): Promise<WikidataMatch | null> {
-	const sanitized = artistName.replace(/"/g, "");
-	const query = `
-      SELECT ?artist ?artistLabel ?statements WHERE {
-        SERVICE wikibase:mwapi {
-          bd:serviceParam wikibase:api "Search" ;
-                          wikibase:endpoint "www.wikidata.org" ;
-                          mwapi:srsearch "${sanitized}" ;
-                          mwapi:language "en" ;
-                          mwapi:srlimit 5 .
-          ?artist wikibase:mwapiItem ?title .
-        }
-        OPTIONAL { ?artist wikibase:statements ?statements. }
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-      }
-      ORDER BY DESC(?statements)
-      LIMIT 1
-    `;
+	const variations = generateNameVariations(artistName);
 
-	const data = await runSparql(query);
-	const bindings: SparqlBinding[] = data?.results?.bindings ?? [];
-	if (!bindings.length) return null;
-	const binding = bindings[0];
-	const uri = binding.artist?.value;
-	const label = binding.artistLabel?.value || sanitized;
-	if (!uri) return null;
-	const id = uri.split("/").pop();
-	if (!id) return null;
-	return { id, label };
+	for (let i = 0; i < variations.length; i++) {
+		const searchTerm = variations[i];
+		const url = wbk.searchEntities({
+			search: searchTerm,
+			language: "en",
+			limit: 5,
+		});
+
+		const response = await fetch(url, {
+			headers: {
+				Accept: "application/json",
+				"User-Agent": USER_AGENT,
+			},
+		});
+
+		if (!response.ok) {
+			if (i < variations.length - 1) {
+				await delay(FETCH_DELAY_MS);
+			}
+			continue;
+		}
+
+		const data = await response.json();
+		const results = data?.search ?? [];
+		if (results.length > 0) {
+			const bestMatch = results[0];
+			const id = bestMatch.id;
+			const label = bestMatch.label || searchTerm;
+
+			if (id) {
+				return { id, label };
+			}
+		}
+
+		if (i < variations.length - 1) {
+			await delay(FETCH_DELAY_MS);
+		}
+	}
+
+	return null;
 }
 
 async function fetchRelations(qid: string): Promise<RelationResult[]> {
@@ -97,16 +137,19 @@ async function fetchRelations(qid: string): Promise<RelationResult[]> {
         LIMIT ${RELATION_LIMIT}
       `;
 		const data = await runSparql(query);
-		const bindings: SparqlBinding[] = data?.results?.bindings ?? [];
-		for (const row of bindings) {
-			const uri = row.related?.value;
-			const label = row.relatedLabel?.value;
+		const simplified = wbk.simplify.sparqlResults(data);
+		for (const row of simplified) {
+			const related = row.related;
+			const relatedLabel = row.relatedLabel;
+			if (!related || typeof related !== "string") continue;
+			const uri = related;
 			if (!uri) continue;
 			const id = uri.split("/").pop();
 			if (!id) continue;
 			all.push({
 				id,
-				label: label || id,
+				label:
+					(typeof relatedLabel === "string" ? relatedLabel : undefined) || id,
 				type: rel,
 			});
 		}
