@@ -3,7 +3,7 @@ import csv from "csv-parser";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
-import { getSession, closeDriver } from "../lib/neo4j";
+import neo4j from "neo4j-driver";
 import "dotenv/config";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,9 +47,15 @@ const formatTitleCase = (str: string) => {
 };
 
 async function main() {
-	// Use getSession from lib/neo4j for consistency
-	const session = getSession();
+	const uri = process.env.NEO4J_URI || "bolt://localhost:7687";
+	const user = process.env.NEO4J_USER || "neo4j";
+	const pass = process.env.NEO4J_PASSWORD || "password";
+	const driver = neo4j.driver(uri, neo4j.auth.basic(user, pass));
+	const session = driver.session();
 	console.log("🚀 Starting Data Import...");
+	console.log(`URI: ${uri}`);
+	console.log(`User: ${user}`);
+	console.log(`Password: ${pass}`);
 
 	try {
 		// STEP A: Clean Old Database
@@ -164,7 +170,7 @@ async function main() {
 		console.error("❌ Error:", error);
 	} finally {
 		await session.close();
-		await closeDriver();
+		await driver.close();
 		console.log("🏁 Finished.");
 	}
 }
