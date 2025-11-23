@@ -7,12 +7,18 @@ import { searchGlobal, type GlobalSearchResult } from "./action";
 import Link from "next/link";
 import { Terminal, Search, User, Palette, Sparkles } from "lucide-react";
 
-export default function Home() {
+import { Suspense } from "react";
+
+function SearchContent() {
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<GlobalSearchResult[]>([]);
 	const [hasSearched, setHasSearched] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [lastSearchedQuery, setLastSearchedQuery] = useState("");
+
+	// Filter & Sort State
+	const [filter, setFilter] = useState<"all" | "artist" | "artwork">("all");
+	const [sort, setSort] = useState<"relevance" | "az" | "za">("relevance");
 
 	const searchParams = useSearchParams();
 	const qParam = searchParams.get("q") || "";
@@ -20,36 +26,48 @@ export default function Home() {
 	const router = useRouter();
 	const [useAiSearch, setUseAiSearch] = useState(false);
 
-	const performSearch = useCallback(async (q: string, semantic: boolean) => {
-		if (!q || !q.trim()) {
-			setResults([]);
-			setHasSearched(true);
-			setLastSearchedQuery(q || "");
-			return;
-		}
-		setIsLoading(true);
-		try {
-			const data = await searchGlobal(q, { semantic });
-			setResults(data);
-			setHasSearched(true);
-			setLastSearchedQuery(q);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
+	const performSearch = useCallback(
+		async (
+			q: string,
+			semantic: boolean,
+			currentFilter: "all" | "artist" | "artwork" = "all",
+			currentSort: "relevance" | "az" | "za" = "relevance",
+		) => {
+			if (!q || !q.trim()) {
+				setResults([]);
+				setHasSearched(true);
+				setLastSearchedQuery(q || "");
+				return;
+			}
+			setIsLoading(true);
+			try {
+				const data = await searchGlobal(q, {
+					semantic,
+					filter: currentFilter,
+					sort: currentSort,
+				});
+				setResults(data);
+				setHasSearched(true);
+				setLastSearchedQuery(q);
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[],
+	);
 
 	useEffect(() => {
 		if (!qParam) return;
-		const signature = `${qParam}|${useAiSearch ? "1" : "0"}`;
+		const signature = `${qParam}|${useAiSearch ? "1" : "0"}|${filter}|${sort}`;
 		if (signature === lastQueried) return;
 		setQuery(qParam);
-		performSearch(qParam, useAiSearch);
+		performSearch(qParam, useAiSearch, filter, sort);
 		setLastQueried(signature);
-	}, [qParam, useAiSearch, lastQueried, performSearch]);
+	}, [qParam, useAiSearch, filter, sort, lastQueried, performSearch]);
 
 	const handleSearch = async (e: React.FormEvent) => {
 		e.preventDefault();
-		await performSearch(query, useAiSearch);
+		await performSearch(query, useAiSearch, filter, sort);
 	};
 
 	const handleConsoleClick = () => {
@@ -57,19 +75,7 @@ export default function Home() {
 	};
 
 	return (
-		<main className="relative min-h-screen flex flex-col items-center justify-start bg-background text-foreground font-sans">
-			{/* Background Animation */}
-			<div className="absolute top-0 left-0 w-full h-screen z-0 overflow-hidden pointer-events-none">
-				<div
-					className="absolute inset-0 bg-cover bg-center opacity-20 animate-pan-slow"
-					style={{
-						backgroundImage:
-							"url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg')",
-					}}
-				/>
-				<div className="absolute inset-0 bg-linear-to-b from-background via-background/20 to-background" />
-			</div>
-
+		<>
 			{/* Console Button */}
 			<button
 				type="button"
@@ -117,20 +123,74 @@ export default function Home() {
 							</button>
 						</div>
 					</div>
-					<div className="mt-4 flex justify-center">
-						<label className="flex items-center gap-3 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+
+					{/* Filters & Options */}
+					<div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 px-2">
+						<div className="flex items-center gap-4">
+							{/* Filter Dropdown */}
+							<div className="flex items-center gap-2 bg-card/30 border border-white/10 rounded-lg p-1">
+								{(["all", "artist", "artwork"] as const).map((f) => (
+									<button
+										key={f}
+										type="button"
+										onClick={() => {
+											setFilter(f);
+											if (query) performSearch(query, useAiSearch, f, sort);
+										}}
+										className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+											filter === f
+												? "bg-primary/20 text-primary shadow-sm"
+												: "text-muted-foreground hover:text-foreground hover:bg-white/5"
+										}`}
+									>
+										{f.charAt(0).toUpperCase() + f.slice(1)}
+									</button>
+								))}
+							</div>
+
+							{/* Sort Dropdown */}
+							<div className="flex items-center gap-2 bg-card/30 border border-white/10 rounded-lg p-1">
+								{(["relevance", "az", "za"] as const).map((s) => (
+									<button
+										key={s}
+										type="button"
+										onClick={() => {
+											setSort(s);
+											if (query) performSearch(query, useAiSearch, filter, s);
+										}}
+										className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+											sort === s
+												? "bg-primary/20 text-primary shadow-sm"
+												: "text-muted-foreground hover:text-foreground hover:bg-white/5"
+										}`}
+									>
+										{s === "relevance"
+											? "Relevance"
+											: s === "az"
+												? "A-Z"
+												: "Z-A"}
+									</button>
+								))}
+							</div>
+						</div>
+
+						<label className="flex items-center gap-3 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors bg-card/30 border border-white/10 px-4 py-2 rounded-lg">
 							<div className="relative flex items-center">
 								<input
 									type="checkbox"
 									checked={useAiSearch}
-									onChange={(e) => setUseAiSearch(e.target.checked)}
+									onChange={(e) => {
+										setUseAiSearch(e.target.checked);
+										if (query)
+											performSearch(query, e.target.checked, filter, sort);
+									}}
 									className="peer sr-only"
 								/>
 								<div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary" />
 							</div>
 							<span className="flex items-center gap-2">
 								<Sparkles className="w-4 h-4 text-primary" />
-								Enable AI Semantic Search (Beta)
+								AI Semantic Search
 							</span>
 						</label>
 					</div>
@@ -204,6 +264,28 @@ export default function Home() {
 					</p>
 				</div>
 			</div>
+		</>
+	);
+}
+
+export default function Home() {
+	return (
+		<main className="relative min-h-screen flex flex-col items-center justify-start bg-background text-foreground font-sans">
+			{/* Background Animation */}
+			<div className="absolute top-0 left-0 w-full h-screen z-0 overflow-hidden pointer-events-none">
+				<div
+					className="absolute inset-0 bg-cover bg-center opacity-20 animate-pan-slow"
+					style={{
+						backgroundImage:
+							"url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg')",
+					}}
+				/>
+				<div className="absolute inset-0 bg-linear-to-b from-background via-background/20 to-background" />
+			</div>
+
+			<Suspense fallback={<div>Loading...</div>}>
+				<SearchContent />
+			</Suspense>
 		</main>
 	);
 }

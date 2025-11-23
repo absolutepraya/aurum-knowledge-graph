@@ -57,6 +57,8 @@ export interface RelatedArtist {
 }
 interface SearchOptions {
 	semantic?: boolean;
+	filter?: "all" | "artist" | "artwork";
+	sort?: "relevance" | "az" | "za";
 }
 
 export interface GraphNode {
@@ -109,21 +111,51 @@ export async function searchGlobal(
 	if (!keyword || !keyword.trim()) return [];
 
 	const session = getSession();
+	const filter = options?.filter || "all";
+	const sort = options?.sort || "relevance";
+
 	try {
-		// Menggunakan UNION untuk menggabungkan hasil pencarian Artist dan Artwork
-		// Kita batasi total hasil dengan CALL { ... } lalu LIMIT di luar
-		const cypher = `
-      CALL {
-        MATCH (a:Artist)
-        WHERE toLower(a.name) CONTAINS toLower($keyword)
-        RETURN 'artist' AS type, a.name AS title, coalesce(a.nationality, 'Artist') AS subtitle, a.name AS linkParam
-        UNION
-        MATCH (a:Artist)-[:CREATED]->(w:Artwork)
-        WHERE toLower(w.title) CONTAINS toLower($keyword)
-        RETURN 'artwork' AS type, w.title AS title, 'Artwork by ' + a.name AS subtitle, toString(w.id) AS linkParam
-      }
-      RETURN * LIMIT 20
-    `;
+		let cypher = "";
+
+		// Base queries
+		const artistQuery = `
+			MATCH (a:Artist)
+			WHERE toLower(a.name) CONTAINS toLower($keyword)
+			RETURN 'artist' AS type, a.name AS title, coalesce(a.nationality, 'Artist') AS subtitle, a.name AS linkParam
+		`;
+
+		const artworkQuery = `
+			MATCH (a:Artist)-[:CREATED]->(w:Artwork)
+			WHERE toLower(w.title) CONTAINS toLower($keyword)
+			RETURN 'artwork' AS type, w.title AS title, 'Artwork by ' + a.name AS subtitle, toString(w.id) AS linkParam
+		`;
+
+		// Construct Query based on Filter
+		if (filter === "artist") {
+			cypher = artistQuery;
+		} else if (filter === "artwork") {
+			cypher = artworkQuery;
+		} else {
+			// UNION for "all"
+			cypher = `
+				CALL {
+					${artistQuery}
+					UNION
+					${artworkQuery}
+				}
+				RETURN *
+			`;
+		}
+
+		// Add Sorting
+		if (sort === "az") {
+			cypher += " ORDER BY title ASC";
+		} else if (sort === "za") {
+			cypher += " ORDER BY title DESC";
+		}
+
+		// Limit
+		cypher += " LIMIT 50";
 
 		const result = await session.run(cypher, { keyword });
 
@@ -136,7 +168,9 @@ export async function searchGlobal(
 
 		let semanticResults: GlobalSearchResult[] = [];
 
-		if (options?.semantic) {
+		// Semantic Search (Only if filter is 'all' or 'artwork' because embeddings are usually on artworks)
+		// Note: If we have artist embeddings, we could include them. Assuming artwork_embeddings for now.
+		if (options?.semantic && (filter === "all" || filter === "artwork")) {
 			try {
 				const embeddingVector = await embedText(keyword);
 				if (embeddingVector.length > 0) {
@@ -147,7 +181,7 @@ export async function searchGlobal(
             RETURN node AS artwork, score, creator.name AS artistName
           `;
 					const semanticResult = await session.run(semanticCypher, {
-						limit: 10,
+						limit: 20,
 						embedding: embeddingVector,
 					});
 					const enriched: GlobalSearchResult[] = [];
@@ -177,6 +211,7 @@ export async function searchGlobal(
 			}
 		}
 
+		// Merge and Deduplicate
 		const combined: GlobalSearchResult[] = [];
 		const seen = new Set<string>();
 		const pushUnique = (item: GlobalSearchResult) => {
@@ -186,8 +221,16 @@ export async function searchGlobal(
 			combined.push(item);
 		};
 
+		// If sorting is by relevance (default), we prioritize keyword matches, then semantic.
+		// If sorting is A-Z or Z-A, we should sort the combined list.
 		keywordResults.forEach(pushUnique);
 		semanticResults.forEach(pushUnique);
+
+		if (sort === "az") {
+			combined.sort((a, b) => a.title.localeCompare(b.title));
+		} else if (sort === "za") {
+			combined.sort((a, b) => b.title.localeCompare(a.title));
+		}
 
 		return combined;
 	} catch (error) {
