@@ -17,12 +17,12 @@ export default async function ArtworkPage({ params }: PageProps) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-800">
 				<div className="text-center">
-					<h1 className="text-2xl font-bold mb-2">Data tidak ditemukan 😔</h1>
+					<h1 className="text-2xl font-bold mb-2">Data not found 😔</h1>
 					<p className="mb-4">
-						Maaf, kami tidak menemukan karya dengan judul "{artworkTitle}".
+						Sorry, we could not find an artwork with the title "{artworkTitle}".
 					</p>
 					<Link href="/" className="text-blue-600 hover:underline">
-						Kembali ke Pencarian
+						Back to Search
 					</Link>
 				</div>
 			</div>
@@ -92,7 +92,7 @@ export default async function ArtworkPage({ params }: PageProps) {
 						href="/"
 						className="text-slate-400 hover:text-white mb-6 inline-block text-sm font-medium"
 					>
-						← KEMBALI KE PENCARIAN
+						← BACK TO SEARCH
 					</Link>
 
 					<div className="flex flex-col gap-8 items-start">
@@ -102,13 +102,13 @@ export default async function ArtworkPage({ params }: PageProps) {
 							</h1>
 							<p className="text-lg text-slate-400 mb-4">
 								{yearFromMeta ? `${yearFromMeta}` : ""}{" "}
-								{art.artist ? `• oleh ${art.artist.name}` : ""}{" "}
-								{museumName ? `• di ${museumName}` : ""}
+								{art.artist ? `• by ${art.artist.name}` : ""}{" "}
+								{museumName ? `• at ${museumName}` : ""}
 							</p>
 
 							<div className="prose prose-invert max-w-none">
 								<p className="text-slate-300 leading-relaxed text-lg">
-									{infoFromMeta || "Tidak ada deskripsi tersedia."}
+									{infoFromMeta || "No description available."}
 								</p>
 							</div>
 
@@ -117,7 +117,7 @@ export default async function ArtworkPage({ params }: PageProps) {
 									href={`/artist/${encodeURIComponent(art.artist.name)}`}
 									className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm"
 								>
-									Lihat profil {art.artist.name} ↗
+									View {art.artist.name}'s profile ↗
 								</Link>
 							)}
 						</div>
@@ -127,10 +127,8 @@ export default async function ArtworkPage({ params }: PageProps) {
 
 			<div className="max-w-6xl mx-auto px-6 py-12">
 				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-					<h2 className="text-2xl font-bold text-slate-800">Pratinjau Karya</h2>
-					<p className="text-sm text-slate-500">
-						Klik gambar untuk memperbesar.
-					</p>
+					<h2 className="text-2xl font-bold text-slate-800">Artwork Preview</h2>
+					<p className="text-sm text-slate-500">Click image to enlarge.</p>
 				</div>
 				<ArtworkImageViewer
 					src={art.url}

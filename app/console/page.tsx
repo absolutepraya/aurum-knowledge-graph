@@ -40,7 +40,7 @@ export default function ConsolePage() {
 		} catch (e: unknown) {
 			setIsError(true);
 			const message = e instanceof Error ? e.message : String(e);
-			setResult(`Terjadi kesalahan sistem: ${message}`);
+			setResult(`System error occurred: ${message}`);
 		} finally {
 			setIsLoading(false);
 		}
@@ -60,7 +60,7 @@ export default function ConsolePage() {
 						href="/"
 						className="text-sm text-slate-400 hover:text-white underline"
 					>
-						← Kembali ke Search UI
+						← Back to Search UI
 					</Link>
 				</div>
 
@@ -70,7 +70,7 @@ export default function ConsolePage() {
 						htmlFor="cypher-query"
 						className="block text-xs text-slate-500 mb-2 uppercase tracking-wider"
 					>
-						Masukkan Query Cypher:
+						Enter Cypher Query:
 					</label>
 					<textarea
 						id="cypher-query"
@@ -107,13 +107,13 @@ export default function ConsolePage() {
 					<pre
 						className={`text-sm ${isError ? "text-red-400" : "text-slate-300"}`}
 					>
-						{result || "// Outputnya entar di sini coy..."}
+						{result || "// Output will appear here..."}
 					</pre>
 				</div>
 
 				{/* Cheat Sheet (Opsional, biar dosen lihat) */}
 				<div className="mt-8 p-4 bg-slate-800/50 rounded text-xs text-slate-400">
-					<p className="font-bold text-slate-300 mb-2">Contoh Query:</p>
+					<p className="font-bold text-slate-300 mb-2">Example Queries:</p>
 					<ul className="list-disc pl-5 space-y-1">
 						<li>
 							<code>MATCH (a:Artist) RETURN a.name, a.nationality LIMIT 5</code>

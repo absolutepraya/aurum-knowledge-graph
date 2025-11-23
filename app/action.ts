@@ -120,7 +120,7 @@ export async function searchGlobal(
         UNION
         MATCH (a:Artist)-[:CREATED]->(w:Artwork)
         WHERE toLower(w.title) CONTAINS toLower($keyword)
-        RETURN 'artwork' AS type, w.title AS title, 'Karya oleh ' + a.name AS subtitle, toString(w.id) AS linkParam
+        RETURN 'artwork' AS type, w.title AS title, 'Artwork by ' + a.name AS subtitle, toString(w.id) AS linkParam
       }
       RETURN * LIMIT 20
     `;
@@ -165,8 +165,8 @@ export async function searchGlobal(
 							type: "artwork",
 							title: props.title || "Artwork",
 							subtitle: artistName
-								? `Mirip dengan ${artistName}`
-								: "Hasil serupa",
+								? `Similar to ${artistName}`
+								: "Similar results",
 							linkParam: artworkId,
 						});
 					}
@@ -254,7 +254,7 @@ export async function getArtistDetail(
 
 		return {
 			name: a.name,
-			bio: a.bio || "Biografi belum tersedia.",
+			bio: a.bio || "Biography not available.",
 			nationality: a.nationality || "Unknown",
 			years: a.years || a.born_died_str || "",
 			wikipedia: a.wikipedia || "#",
@@ -463,7 +463,7 @@ export async function getArtworkDetail(
 // biome-ignore lint/suspicious/noExplicitAny: <X>
 export async function executeCypherQuery(cypherQuery: string): Promise<any> {
 	if (!cypherQuery || !cypherQuery.trim()) {
-		return { error: true, message: "Query tidak boleh kosong." };
+		return { error: true, message: "Query cannot be empty." };
 	}
 
 	const session = getSession();
@@ -499,13 +499,13 @@ export async function executeCypherQuery(cypherQuery: string): Promise<any> {
 		return {
 			success: true,
 			records: formattedRecords,
-			summary: `Query berhasil dijalankan. Ditemukan ${result.records.length} data.`,
+			summary: `Query executed successfully. Found ${result.records.length} records.`,
 		};
 	} catch (error: unknown) {
 		const message = error instanceof Error ? error.message : String(error);
 		return {
 			error: true,
-			message: message || "Terjadi error saat menjalankan query.",
+			message: message || "An error occurred while executing the query.",
 		};
 	} finally {
 		await session.close();

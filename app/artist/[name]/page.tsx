@@ -25,12 +25,12 @@ export default async function ArtistPage({ params }: PageProps) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-800">
 				<div className="text-center">
-					<h1 className="text-2xl font-bold mb-2">Data tidak ditemukan 😔</h1>
+					<h1 className="text-2xl font-bold mb-2">Data not found 😔</h1>
 					<p className="mb-4">
-						Maaf, kami tidak menemukan seniman dengan nama "{artistName}".
+						Sorry, we could not find an artist with the name "{artistName}".
 					</p>
 					<Link href="/" className="text-blue-600 hover:underline">
-						Kembali ke Pencarian
+						Back to Search
 					</Link>
 				</div>
 			</div>
@@ -40,10 +40,10 @@ export default async function ArtistPage({ params }: PageProps) {
 	// Placeholder to use when artwork URL is missing
 	const placeholder = "https://via.placeholder.com/400x300?text=No+Image";
 	const relationSections = [
-		{ title: "Dipengaruhi oleh", items: artist.influencedBy },
-		{ title: "Mempengaruhi", items: artist.influences },
-		{ title: "Guru", items: artist.mentors },
-		{ title: "Murid", items: artist.students },
+		{ title: "Influenced By", items: artist.influencedBy },
+		{ title: "Influenced", items: artist.influences },
+		{ title: "Mentors", items: artist.mentors },
+		{ title: "Students", items: artist.students },
 	].filter((section) => section.items.length > 0);
 
 	return (
@@ -55,7 +55,7 @@ export default async function ArtistPage({ params }: PageProps) {
 						href="/"
 						className="text-slate-400 hover:text-white mb-6 inline-block text-sm font-medium"
 					>
-						← KEMBALI KE PENCARIAN
+						← BACK TO SEARCH
 					</Link>
 
 					<div className="flex flex-col md:flex-row gap-8 items-start">
@@ -70,7 +70,7 @@ export default async function ArtistPage({ params }: PageProps) {
 							{/* Extra metadata returned from action.ts */}
 							<div className="flex flex-wrap gap-4 mb-6">
 								<span className="text-sm text-slate-300">
-									Total karya:{" "}
+									Total artworks:{" "}
 									<strong className="text-white ml-1">
 										{artist.paintings_count ?? "—"}
 									</strong>
@@ -107,14 +107,14 @@ export default async function ArtistPage({ params }: PageProps) {
 									rel="noopener noreferrer"
 									className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm"
 								>
-									Baca selengkapnya di Wikipedia ↗
+									Read more on Wikipedia ↗
 								</a>
 							)}
 
 							{relationSections.length > 0 && (
 								<div className="mt-8 w-full">
 									<h3 className="text-lg font-semibold text-white mb-3">
-										Relasi Wikidata
+										Wikidata Relations
 									</h3>
 									<div className="grid gap-4 sm:grid-cols-2">
 										{relationSections.map((section) => (
@@ -149,7 +149,7 @@ export default async function ArtistPage({ params }: PageProps) {
 			{/* Grid Karya Seni */}
 			<div className="max-w-6xl mx-auto px-6 py-12">
 				<h2 className="text-2xl font-bold mb-8 border-b border-slate-200 pb-4 text-slate-800">
-					Karya Terkenal ({artist.artworks.length})
+					Famous Works ({artist.artworks.length})
 				</h2>
 
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -177,7 +177,7 @@ export default async function ArtistPage({ params }: PageProps) {
 
 				{artist.artworks.length === 0 && (
 					<p className="text-slate-500 italic text-center py-10">
-						Belum ada data gambar untuk seniman ini.
+						No image data available for this artist.
 					</p>
 				)}
 			</div>
@@ -189,7 +189,7 @@ export default async function ArtistPage({ params }: PageProps) {
 							Relationship Graph
 						</h2>
 						<p className="text-sm text-slate-500">
-							Klik node untuk membuka halaman detail.
+							Click node to open detail page.
 						</p>
 					</div>
 					<GraphViz data={graphData} />

@@ -64,10 +64,10 @@ export default function Home() {
 					PROPERTY OF KGTAU
 				</h1>
 				<h1 className="text-4xl font-extrabold text-center mb-2 text-slate-800">
-					🏛️ Galeri Sejarah Seni
+					🏛️ Art History Gallery
 				</h1>
 				<p className="text-center text-slate-500 mb-8">
-					Cari Seniman atau Karya Seni (Contoh: "Mona Lisa" atau "Picasso")
+					Search Artists or Artworks (Example: "Mona Lisa" or "Picasso")
 				</p>
 
 				<div className="flex justify-end mb-4">
@@ -87,7 +87,7 @@ export default function Home() {
 							type="text"
 							value={query}
 							onChange={(e) => setQuery(e.target.value)}
-							placeholder="Ketik kata kunci bukan kata-kata yang kau miliki..."
+							placeholder="Type keywords to search..."
 							className="flex-1 p-4 rounded-xl border border-slate-300 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
 						/>
 						<button
@@ -105,7 +105,7 @@ export default function Home() {
 							onChange={(e) => setUseAiSearch(e.target.checked)}
 							className="w-4 h-4 accent-blue-600"
 						/>
-						Gunakan AI Search (beta)
+						Use AI Search (beta)
 					</label>
 				</form>
 
@@ -149,7 +149,7 @@ export default function Home() {
 
 					{hasSearched && results.length === 0 && !isLoading && (
 						<div className="text-center text-slate-400 py-10 bg-white rounded-lg border border-dashed border-slate-300">
-							Tidak ditemukan hasil untuk "{lastSearchedQuery || query}".
+							No results found for "{lastSearchedQuery || query}".
 						</div>
 					)}
 				</div>
