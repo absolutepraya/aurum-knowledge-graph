@@ -210,6 +210,8 @@ export async function getArtworkDetail(
  * Fitur bebas untuk menjalankan query Cypher mentah dari frontend.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+// biome-ignore lint/suspicious/noExplicitAny: <X>
 export async function executeCypherQuery(cypherQuery: string): Promise<any> {
 	if (!cypherQuery || !cypherQuery.trim()) {
 		return { error: true, message: "Query tidak boleh kosong." };
@@ -221,7 +223,7 @@ export async function executeCypherQuery(cypherQuery: string): Promise<any> {
 
 		// Format hasil agar mudah dibaca JSON-nya di frontend
 		const formattedRecords = result.records.map((record: Record) => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			// biome-ignore lint/suspicious/noExplicitAny: <X>
 			const row: { [key: string]: any } = {};
 			record.keys.forEach((key, index) => {
 				let value = record.get(index);
