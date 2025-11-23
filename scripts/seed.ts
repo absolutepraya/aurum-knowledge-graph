@@ -1,93 +1,99 @@
-import fs from 'fs';
-import csv from 'csv-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { getSession, closeDriver } from '../lib/neo4j';
-import 'dotenv/config';
+import fs from "node:fs";
+import csv from "csv-parser";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+import { getSession, closeDriver } from "../lib/neo4j";
+import "dotenv/config";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // 1. Name Normalization Function
 const normalizeName = (rawName: string) => {
-  if (!rawName) return '';
+	if (!rawName) return "";
 
-  let name = String(rawName).trim();
-  name = name.replace(/^"|"$/g, '');
-  name = name.replace(/\s+/g, ' ');
-  name = name.normalize('NFKC');
+	let name = String(rawName).trim();
+	name = name.replace(/^"|"$/g, "");
+	name = name.replace(/\s+/g, " ");
+	name = name.normalize("NFKC");
 
-  if (name.includes(',')) {
-    const parts = name.split(',');
-    const last = parts[0].trim();
-    const first = parts.slice(1).join(',').trim();
-    name = `${first} ${last}`;
-  }
+	if (name.includes(",")) {
+		const parts = name.split(",");
+		const last = parts[0].trim();
+		const first = parts.slice(1).join(",").trim();
+		name = `${first} ${last}`;
+	}
 
-  name = name.replace(/[\s,-]+$/g, '').trim();
+	name = name.replace(/[\s,-]+$/g, "").trim();
 
-  return formatTitleCase(name);
+	return formatTitleCase(name);
 };
 
 // Helper to create Title Case
 const formatTitleCase = (str: string) => {
-  return str
-    .split(' ')
-    .filter(Boolean)
-    .map((word) => {
-      return word
-        .split("-")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-        .join('-');
-    })
-    .join(' ');
+	return str
+		.split(" ")
+		.filter(Boolean)
+		.map((word) => {
+			return word
+				.split("-")
+				.map(
+					(part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase(),
+				)
+				.join("-");
+		})
+		.join(" ");
 };
 
 async function main() {
-  // Use getSession from lib/neo4j for consistency
-  const session = getSession();
-  console.log("🚀 Starting Data Import...");
+	// Use getSession from lib/neo4j for consistency
+	const session = getSession();
+	console.log("🚀 Starting Data Import...");
 
-  try {
-    // STEP A: Clean Old Database
-    await session.run('MATCH (n) DETACH DELETE n');
-    console.log("🧹 Old database cleaned.");
+	try {
+		// STEP A: Clean Old Database
+		await session.run("MATCH (n) DETACH DELETE n");
+		console.log("🧹 Old database cleaned.");
 
-    // STEP B: Import artists.csv
-    const artistsPath = path.join(__dirname, '..', 'data', 'artists.csv');
-    if (fs.existsSync(artistsPath)) {
-        const artistsStream = fs.createReadStream(artistsPath).pipe(csv());
+		// STEP B: Import artists.csv
+		const artistsPath = path.join(__dirname, "..", "data", "artists.csv");
+		if (fs.existsSync(artistsPath)) {
+			const artistsStream = fs.createReadStream(artistsPath).pipe(csv());
 
-        for await (const row of artistsStream) {
-        const cleanName = normalizeName(row.name);
+			for await (const row of artistsStream) {
+				const cleanName = normalizeName(row.name);
 
-        await session.run(`
+				await session.run(
+					`
             MERGE (a:Artist {name: $name})
             SET a.bio = $bio,
                 a.years = $years,
                 a.wikipedia = $wikipedia,
                 a.source = coalesce(a.source, 'BestArtworks')
-        `, {
-            name: cleanName,
-            bio: row.bio,
-            years: row.years,
-            wikipedia: row.wikipedia
-        });
-        }
-        console.log("✅ Data 'artists.csv' finished.");
-    } else {
-        console.warn("⚠️ File 'artists.csv' not found.");
-    }
+        `,
+					{
+						name: cleanName,
+						bio: row.bio,
+						years: row.years,
+						wikipedia: row.wikipedia,
+					},
+				);
+			}
+			console.log("✅ Data 'artists.csv' finished.");
+		} else {
+			console.warn("⚠️ File 'artists.csv' not found.");
+		}
 
-    // STEP C: Import info_dataset.csv
-    const infoPath = path.join(__dirname, '..', 'data', 'info_dataset.csv');
-    if (fs.existsSync(infoPath)) {
-        const infoStream = fs.createReadStream(infoPath).pipe(csv());
-        for await (const row of infoStream) {
-        const cleanName = normalizeName(row.artist);
+		// STEP C: Import info_dataset.csv
+		const infoPath = path.join(__dirname, "..", "data", "info_dataset.csv");
+		if (fs.existsSync(infoPath)) {
+			const infoStream = fs.createReadStream(infoPath).pipe(csv());
+			for await (const row of infoStream) {
+				const cleanName = normalizeName(row.artist);
 
-        await session.run(`
+				await session.run(
+					`
             MERGE (a:Artist {name: $name})
             SET a.born_died_str = coalesce(a.born_died_str, $bornDied),
                 a.school = coalesce(a.school, $school),
@@ -96,29 +102,37 @@ async function main() {
 
             MERGE (m:Movement {name: $period})
             MERGE (a)-[:BELONGS_TO]->(m)
-        `, {
-            name: cleanName,
-            bornDied: row['born-died'],
-            school: row.school,
-            url: row.url,
-            period: row.period,
-            nationality: row.nationality
-        });
-        }
-        console.log("✅ Data 'info_dataset.csv' finished.");
-    } else {
-        console.warn("⚠️ File 'info_dataset.csv' not found.");
-    }
+        `,
+					{
+						name: cleanName,
+						bornDied: row["born-died"],
+						school: row.school,
+						url: row.url,
+						period: row.period,
+						nationality: row.nationality,
+					},
+				);
+			}
+			console.log("✅ Data 'info_dataset.csv' finished.");
+		} else {
+			console.warn("⚠️ File 'info_dataset.csv' not found.");
+		}
 
-    // STEP D: Import artwork_dataset.csv
-    const artworkPath = path.join(__dirname, '..', 'data', 'artwork_dataset.csv');
-    if (fs.existsSync(artworkPath)) {
-        const artworkStream = fs.createReadStream(artworkPath).pipe(csv());
-        let count = 0;
-        for await (const row of artworkStream) {
-        const cleanArtistName = normalizeName(row.artist);
-        
-        await session.run(`
+		// STEP D: Import artwork_dataset.csv
+		const artworkPath = path.join(
+			__dirname,
+			"..",
+			"data",
+			"artwork_dataset.csv",
+		);
+		if (fs.existsSync(artworkPath)) {
+			const artworkStream = fs.createReadStream(artworkPath).pipe(csv());
+			let count = 0;
+			for await (const row of artworkStream) {
+				const cleanArtistName = normalizeName(row.artist);
+
+				await session.run(
+					`
             MERGE (a:Artist {name: $artistName})
             MERGE (w:Artwork {id: $id})
             SET w.title = $title,
@@ -126,30 +140,33 @@ async function main() {
                 w.url = $jpgUrl,
                 w.file_info = $fileInfo
             MERGE (a)-[:CREATED]->(w)
-        `, {
-            artistName: cleanArtistName,
-            id: row.ID,
-            title: row.title,
-            picData: row['picture data'],
-            jpgUrl: row['jpg url'],
-            fileInfo: row['file info']
-        });
-        
-        count++;
-        if (count % 100 === 0) console.log(`   ...processing ${count} artwork`);
-        }
-        console.log(`✅ Data 'artwork_dataset.csv' finished (${count} artworks).`);
-    } else {
-        console.warn("⚠️ File 'artwork_dataset.csv' not found.");
-    }
+        `,
+					{
+						artistName: cleanArtistName,
+						id: row.ID,
+						title: row.title,
+						picData: row["picture data"],
+						jpgUrl: row["jpg url"],
+						fileInfo: row["file info"],
+					},
+				);
 
-  } catch (error) {
-    console.error("❌ Error:", error);
-  } finally {
-    await session.close();
-    await closeDriver();
-    console.log("🏁 Finished.");
-  }
+				count++;
+				if (count % 100 === 0) console.log(`   ...processing ${count} artwork`);
+			}
+			console.log(
+				`✅ Data 'artwork_dataset.csv' finished (${count} artworks).`,
+			);
+		} else {
+			console.warn("⚠️ File 'artwork_dataset.csv' not found.");
+		}
+	} catch (error) {
+		console.error("❌ Error:", error);
+	} finally {
+		await session.close();
+		await closeDriver();
+		console.log("🏁 Finished.");
+	}
 }
 
 main();
