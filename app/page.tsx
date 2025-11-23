@@ -20,8 +20,9 @@ export default function Home() {
 	const router = useRouter();
 	const [isAnimatingConsole, setIsAnimatingConsole] = useState(false);
 	const mainRef = useRef<HTMLElement | null>(null);
+	const [useAiSearch, setUseAiSearch] = useState(false);
 
-	const performSearch = useCallback(async (q: string) => {
+	const performSearch = useCallback(async (q: string, semantic: boolean) => {
 		if (!q || !q.trim()) {
 			setResults([]);
 			setHasSearched(true);
@@ -29,25 +30,29 @@ export default function Home() {
 			return;
 		}
 		setIsLoading(true);
-		const data = await searchGlobal(q);
-		setResults(data);
-		setHasSearched(true);
-		setLastSearchedQuery(q);
-		setIsLoading(false);
+		try {
+			const data = await searchGlobal(q, { semantic });
+			setResults(data);
+			setHasSearched(true);
+			setLastSearchedQuery(q);
+		} finally {
+			setIsLoading(false);
+		}
 	}, []);
 
 	// run search when ?q= changes, but only if it's a new q value
 	useEffect(() => {
 		if (!qParam) return;
-		if (qParam === lastQueried) return;
+		const signature = `${qParam}|${useAiSearch ? "1" : "0"}`;
+		if (signature === lastQueried) return;
 		setQuery(qParam);
-		performSearch(qParam);
-		setLastQueried(qParam);
-	}, [qParam, lastQueried, performSearch]);
+		performSearch(qParam, useAiSearch);
+		setLastQueried(signature);
+	}, [qParam, useAiSearch, lastQueried, performSearch]);
 
 	const handleSearch = async (e: React.FormEvent) => {
 		e.preventDefault();
-		await performSearch(query);
+		await performSearch(query, useAiSearch);
 	};
 
 	const handleConsoleClick = async () => {
@@ -110,21 +115,32 @@ export default function Home() {
 					</button>
 				</div>
 
-				<form onSubmit={handleSearch} className="flex gap-3 mb-10">
-					<input
-						type="text"
-						value={query}
-						onChange={(e) => setQuery(e.target.value)}
-						placeholder="Ketik kata kunci bukan kata-kata yang kau miliki..."
-						className="flex-1 p-4 rounded-xl border border-slate-300 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
-					/>
-					<button
-						type="submit"
-						disabled={isLoading}
-						className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold transition-colors"
-					>
-						{isLoading ? "..." : "🔍︎"}
-					</button>
+				<form onSubmit={handleSearch} className="flex flex-col gap-3 mb-10">
+					<div className="flex gap-3">
+						<input
+							type="text"
+							value={query}
+							onChange={(e) => setQuery(e.target.value)}
+							placeholder="Ketik kata kunci bukan kata-kata yang kau miliki..."
+							className="flex-1 p-4 rounded-xl border border-slate-300 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+						/>
+						<button
+							type="submit"
+							disabled={isLoading}
+							className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold transition-colors"
+						>
+							{isLoading ? "..." : "🔍︎"}
+						</button>
+					</div>
+					<label className="flex items-center gap-2 text-sm text-slate-600">
+						<input
+							type="checkbox"
+							checked={useAiSearch}
+							onChange={(e) => setUseAiSearch(e.target.checked)}
+							className="w-4 h-4 accent-blue-600"
+						/>
+						Gunakan AI Search (beta)
+					</label>
 				</form>
 
 				<div className="grid gap-4">

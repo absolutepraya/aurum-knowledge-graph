@@ -2,6 +2,7 @@
 "use server";
 
 // Use relative path so the module resolves at runtime
+import { embedText } from "../lib/embeddings";
 import { getSession } from "../lib/neo4j";
 import type { Node, Record } from "neo4j-driver";
 
@@ -44,6 +45,10 @@ export interface ArtworkDetail {
 		name: string;
 		nationality?: string;
 	} | null;
+}
+
+interface SearchOptions {
+	semantic?: boolean;
 }
 
 export interface GraphNode {
@@ -90,6 +95,7 @@ function toText(value: unknown): string {
  */
 export async function searchGlobal(
 	keyword: string,
+	options?: SearchOptions,
 ): Promise<GlobalSearchResult[]> {
 	// Return early for empty queries
 	if (!keyword || !keyword.trim()) return [];
@@ -113,12 +119,69 @@ export async function searchGlobal(
 
 		const result = await session.run(cypher, { keyword });
 
-		return result.records.map((r: Record) => ({
+		const keywordResults = result.records.map((r: Record) => ({
 			type: r.get("type"),
 			title: r.get("title"),
 			subtitle: r.get("subtitle") || "",
 			linkParam: r.get("linkParam") || r.get("title"),
 		}));
+
+		let semanticResults: GlobalSearchResult[] = [];
+
+		if (options?.semantic) {
+			try {
+				const embeddingVector = await embedText(keyword);
+				if (embeddingVector.length > 0) {
+					const semanticCypher = `
+            CALL db.index.vector.queryNodes("artwork_embeddings", $limit, $embedding)
+            YIELD node, score
+            OPTIONAL MATCH (creator:Artist)-[:CREATED]->(node)
+            RETURN node AS artwork, score, creator.name AS artistName
+          `;
+					const semanticResult = await session.run(semanticCypher, {
+						limit: 10,
+						embedding: embeddingVector,
+					});
+					const enriched: GlobalSearchResult[] = [];
+					for (const record of semanticResult.records) {
+						const artworkNode = record.get("artwork") as Node | undefined;
+						if (!artworkNode) continue;
+						const props = artworkNode.properties;
+						const artistName = record.get("artistName") ?? "";
+						const artworkId =
+							toText(props.id) ||
+							toText(props.title) ||
+							toText(artworkNode.identity);
+						if (!artworkId) continue;
+						enriched.push({
+							type: "artwork",
+							title: props.title || "Artwork",
+							subtitle: artistName
+								? `Mirip dengan ${artistName}`
+								: "Hasil serupa",
+							linkParam: artworkId,
+						});
+					}
+					semanticResults = enriched;
+				}
+			} catch (error) {
+				console.error("Semantic Search Error:", error);
+			}
+		}
+
+		const combined: GlobalSearchResult[] = [];
+		const seen = new Set<string>();
+		const pushUnique = (item: GlobalSearchResult) => {
+			const key = `${item.type}-${item.linkParam}`;
+			if (seen.has(key)) return;
+			seen.add(key);
+			combined.push(item);
+		};
+
+		keywordResults.forEach(pushUnique);
+		semanticResults.forEach(pushUnique);
+
+		return combined;
 	} catch (error) {
 		console.error("Global Search Error:", error);
 		return [];
