@@ -121,8 +121,15 @@ export default async function ArtistPage({ params }: PageProps) {
 										href={artist.wikipedia}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all hover:border-primary/50 hover:text-primary"
+										className="inline-flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all hover:border-primary/50 hover:text-primary"
 									>
+										{/** biome-ignore lint/performance/noImgElement: <x> */}
+										<img
+											src="/wikipedia.webp"
+											alt="Wikipedia"
+											width={20}
+											height={20}
+										/>
 										Read on Wikipedia <ExternalLink className="w-4 h-4" />
 									</a>
 								)}

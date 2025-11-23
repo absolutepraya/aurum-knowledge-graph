@@ -4,10 +4,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { searchGlobal, type GlobalSearchResult } from "./action";
-import Link from "next/link";
-import { Terminal, Search, User, Palette, Sparkles } from "lucide-react";
+import {
+	Terminal,
+	Search,
+	User,
+	Palette,
+	Sparkles,
+	ListFilter,
+	ArrowDownNarrowWide,
+} from "lucide-react";
 
 import { Suspense } from "react";
+import Link from "next/link";
 
 function SearchContent() {
 	const [query, setQuery] = useState("");
@@ -128,7 +136,9 @@ function SearchContent() {
 					<div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 px-2">
 						<div className="flex items-center gap-4">
 							{/* Filter Dropdown */}
-							<div className="flex items-center gap-2 bg-card/30 border border-white/10 rounded-lg p-1">
+							<div className="flex items-center gap-2 bg-card/30 backdrop-blur-md border border-white/10 rounded-lg p-1 pl-3">
+								<ListFilter className="w-4 h-4 text-muted-foreground" />
+								<div className="h-4 w-[1px] bg-white/10 mx-1" />
 								{(["all", "artist", "artwork"] as const).map((f) => (
 									<button
 										key={f}
@@ -149,7 +159,9 @@ function SearchContent() {
 							</div>
 
 							{/* Sort Dropdown */}
-							<div className="flex items-center gap-2 bg-card/30 border border-white/10 rounded-lg p-1">
+							<div className="flex items-center gap-2 bg-card/30 backdrop-blur-md border border-white/10 rounded-lg p-1 pl-3">
+								<ArrowDownNarrowWide className="w-4 h-4 text-muted-foreground" />
+								<div className="h-4 w-[1px] bg-white/10 mx-1" />
 								{(["relevance", "az", "za"] as const).map((s) => (
 									<button
 										key={s}
@@ -174,7 +186,7 @@ function SearchContent() {
 							</div>
 						</div>
 
-						<label className="flex items-center gap-3 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors bg-card/30 border border-white/10 px-4 py-2 rounded-lg">
+						<label className="flex items-center gap-3 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors bg-card/30 backdrop-blur-md border border-white/10 px-4 py-2 rounded-lg">
 							<div className="relative flex items-center">
 								<input
 									type="checkbox"
