@@ -3,7 +3,7 @@
 
 // Use relative path so the module resolves at runtime
 import { getSession } from "../lib/neo4j";
-import type { Record } from "neo4j-driver";
+import type { Node, Record } from "neo4j-driver";
 
 // --- INTERFACES ---
 
@@ -44,6 +44,42 @@ export interface ArtworkDetail {
 		name: string;
 		nationality?: string;
 	} | null;
+}
+
+export interface GraphNode {
+	id: string;
+	name: string;
+	group: "artist" | "artwork" | "movement";
+	val: number;
+	slug?: string;
+}
+
+export interface GraphLink {
+	source: string;
+	target: string;
+	type: string;
+}
+
+export interface ArtistGraphData {
+	nodes: GraphNode[];
+	links: GraphLink[];
+}
+
+type NeoNumeric = { toNumber: () => number };
+
+function isNeoNumeric(value: unknown): value is NeoNumeric {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		"toNumber" in value &&
+		typeof (value as NeoNumeric).toNumber === "function"
+	);
+}
+
+function toText(value: unknown): string {
+	if (value === null || value === undefined) return "";
+	if (isNeoNumeric(value)) return value.toNumber().toString();
+	return String(value);
 }
 
 // --- ACTIONS / FUNCTIONS ---
@@ -148,6 +184,134 @@ export async function getArtistDetail(
 		};
 	} catch (error) {
 		console.error("Detail Artist Error:", error);
+		return null;
+	} finally {
+		await session.close();
+	}
+}
+
+export async function getArtistGraphData(
+	artistName: string,
+): Promise<ArtistGraphData | null> {
+	if (!artistName) return null;
+	const session = getSession();
+	try {
+		const cypher = `
+      MATCH (artist:Artist {name: $name})
+      OPTIONAL MATCH (artist)-[:CREATED]->(artwork:Artwork)
+      OPTIONAL MATCH (artist)-[:BELONGS_TO]->(movement:Movement)
+      OPTIONAL MATCH (movement)<-[:BELONGS_TO]-(related:Artist)
+      WHERE related IS NULL OR related <> artist
+      WITH artist,
+           collect(DISTINCT artwork) AS artworks,
+           collect(DISTINCT movement) AS movements,
+           collect(DISTINCT CASE WHEN related IS NOT NULL THEN {movement: movement, artist: related} END) AS relatedPairs
+      RETURN artist, artworks, movements, relatedPairs
+    `;
+		const result = await session.run(cypher, { name: artistName });
+		if (result.records.length === 0) return null;
+		const record = result.records[0];
+		const artistNode = record.get("artist") as Node | undefined;
+		if (!artistNode) return null;
+		const nodes = new Map<string, GraphNode>();
+		const links: GraphLink[] = [];
+		const addNode = (
+			id: string,
+			name: string,
+			group: GraphNode["group"],
+			val: number,
+			slug?: string,
+		) => {
+			if (!id || nodes.has(id)) return;
+			nodes.set(id, { id, name, group, val, slug });
+		};
+		const addLink = (source: string, target: string, type: string) => {
+			if (!source || !target) return;
+			links.push({ source, target, type });
+		};
+		const centerRawId =
+			toText(artistNode.properties.id) ||
+			artistNode.properties.name ||
+			artistName;
+		const centerName = String(artistNode.properties.name || artistName);
+		const centerId = `artist-${centerRawId}`;
+		addNode(centerId, centerName, "artist", 20, centerName);
+		const artworks = (
+			(record.get("artworks") as Node[] | undefined) ?? []
+		).filter(Boolean);
+		for (const artworkNode of artworks.slice(0, 20)) {
+			const rawId =
+				toText(artworkNode.properties.id) ||
+				toText(artworkNode.properties.title) ||
+				toText(artworkNode.identity);
+			if (!rawId) continue;
+			const nodeId = `artwork-${rawId}`;
+			const name = String(
+				artworkNode.properties.title || artworkNode.properties.name || rawId,
+			);
+			addNode(nodeId, name, "artwork", 8, rawId);
+			addLink(centerId, nodeId, "CREATED");
+		}
+		const movements = (
+			(record.get("movements") as Node[] | undefined) ?? []
+		).filter(Boolean);
+		for (const movementNode of movements) {
+			const rawId =
+				toText(movementNode.properties.id) ||
+				toText(movementNode.properties.name) ||
+				toText(movementNode.identity);
+			if (!rawId) continue;
+			const nodeId = `movement-${rawId}`;
+			const name = String(
+				movementNode.properties.name || movementNode.properties.title || rawId,
+			);
+			addNode(nodeId, name, "movement", 10);
+			addLink(centerId, nodeId, "BELONGS_TO");
+		}
+		type RelatedPair = { movement: Node; artist: Node } | null;
+		const pairs = (
+			(record.get("relatedPairs") as RelatedPair[] | undefined) ?? []
+		).filter(Boolean) as { movement: Node; artist: Node }[];
+		const seenRelated = new Set<string>();
+		for (const pair of pairs) {
+			const relatedNode = pair.artist;
+			const movementNode = pair.movement;
+			if (!relatedNode) continue;
+			const relatedRawId =
+				toText(relatedNode.properties.id) ||
+				toText(relatedNode.properties.name) ||
+				toText(relatedNode.identity);
+			if (!relatedRawId || seenRelated.has(relatedRawId)) continue;
+			seenRelated.add(relatedRawId);
+			const relatedId = `artist-${relatedRawId}`;
+			const relatedName = String(
+				relatedNode.properties.name ||
+					relatedNode.properties.title ||
+					relatedRawId,
+			);
+			addNode(relatedId, relatedName, "artist", 12, relatedName);
+			addLink(relatedId, centerId, "RELATED");
+			if (movementNode) {
+				const movementRawId =
+					toText(movementNode.properties.id) ||
+					toText(movementNode.properties.name) ||
+					toText(movementNode.identity);
+				if (movementRawId) {
+					const movementId = `movement-${movementRawId}`;
+					const movementName = String(
+						movementNode.properties.name ||
+							movementNode.properties.title ||
+							movementRawId,
+					);
+					addNode(movementId, movementName, "movement", 10);
+					addLink(relatedId, movementId, "BELONGS_TO");
+				}
+			}
+			if (seenRelated.size >= 5) break;
+		}
+		return { nodes: Array.from(nodes.values()), links };
+	} catch (error) {
+		console.error("Artist Graph Error:", error);
 		return null;
 	} finally {
 		await session.close();

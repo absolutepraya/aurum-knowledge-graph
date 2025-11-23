@@ -1,5 +1,6 @@
 // app/artist/[name]/page.tsx
-import { getArtistDetail } from "../../action";
+import GraphViz from "@/components/GraphViz";
+import { getArtistDetail, getArtistGraphData } from "../../action";
 import Link from "next/link";
 
 // PENTING: Di Next.js 15, params adalah Promise
@@ -14,8 +15,10 @@ export default async function ArtistPage({ params }: PageProps) {
 	// 2. Baru decode namanya
 	const artistName = decodeURIComponent(resolvedParams.name);
 
-	// 3. Panggil data dari database
-	const artist = await getArtistDetail(artistName);
+	const [artist, graphData] = await Promise.all([
+		getArtistDetail(artistName),
+		getArtistGraphData(artistName),
+	]);
 
 	// Jika artist tidak ditemukan
 	if (!artist) {
@@ -140,6 +143,20 @@ export default async function ArtistPage({ params }: PageProps) {
 						Belum ada data gambar untuk seniman ini.
 					</p>
 				)}
+			</div>
+
+			<div className="max-w-6xl mx-auto px-6 pb-16">
+				<div className="border-t border-slate-200 pt-12">
+					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+						<h2 className="text-2xl font-bold text-slate-800">
+							Relationship Graph
+						</h2>
+						<p className="text-sm text-slate-500">
+							Klik node untuk membuka halaman detail.
+						</p>
+					</div>
+					<GraphViz data={graphData} />
+				</div>
 			</div>
 		</div>
 	);
