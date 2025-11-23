@@ -7,8 +7,9 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint",
-		"seed": "npx tsx scripts/seed.ts",
-		"embed": "npx tsx scripts/generate-embeddings.ts",
+		"seed": "bun tsx scripts/seed.ts",
+		"embed": "bun tsx scripts/generate-embeddings.ts",
+		"enrich": "bun run scripts/enrich-data.ts",
 		"check": "biome check .",
 		"format": "biome format .",
 		"prepare": "husky"
@@ -24,7 +25,8 @@
 		"react-dom": "19.2.0",
 		"react-force-graph-2d": "^1.29.0",
 		"react-medium-image-zoom": "^5.4.0",
-		"sharp": "^0.34.5"
+		"sharp": "^0.34.5",
+		"wikibase-sdk": "^11.1.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.7",
