@@ -121,7 +121,7 @@ export default function ConsolePage() {
 						<li>
 							<code>
 								MATCH (a:Artist)-[:CREATED]-&gt;(w:Artwork) WHERE a.name
-								CONTAINS 'Vinci' RETURN w.title
+								CONTAINS &apos;Vinci&apos; RETURN w.title
 							</code>
 						</li>
 						<li>

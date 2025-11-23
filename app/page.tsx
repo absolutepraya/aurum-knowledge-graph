@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { searchGlobal, type GlobalSearchResult } from "./action"; // Import fungsi baru (fixed path)
+import { searchGlobal, type GlobalSearchResult } from "./action";
 import Link from "next/link";
 
 export default function Home() {
@@ -11,12 +11,11 @@ export default function Home() {
 	const [results, setResults] = useState<GlobalSearchResult[]>([]);
 	const [hasSearched, setHasSearched] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	// Track the exact term that was last searched (prevents live-updating "not found" text while typing)
 	const [lastSearchedQuery, setLastSearchedQuery] = useState("");
 
 	const searchParams = useSearchParams();
 	const qParam = searchParams.get("q") || "";
-	const [lastQueried, setLastQueried] = useState(""); // track last param we searched for
+	const [lastQueried, setLastQueried] = useState("");
 	const router = useRouter();
 	const [useAiSearch, setUseAiSearch] = useState(false);
 
@@ -38,7 +37,6 @@ export default function Home() {
 		}
 	}, []);
 
-	// run search when ?q= changes, but only if it's a new q value
 	useEffect(() => {
 		if (!qParam) return;
 		const signature = `${qParam}|${useAiSearch ? "1" : "0"}`;
@@ -58,52 +56,82 @@ export default function Home() {
 	};
 
 	return (
-		<main className="relative min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
+		<main className="relative min-h-screen flex flex-col items-center justify-start bg-background text-foreground font-sans overflow-hidden">
+			{/* Background Animation */}
+			<div className="absolute inset-0 z-0 overflow-hidden">
+				<div
+					className="absolute inset-0 bg-cover bg-center opacity-20 animate-pan-slow"
+					style={{
+						backgroundImage:
+							"url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg')",
+					}}
+				/>
+				<div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
+			</div>
+
+			{/* Console Button */}
 			<button
 				type="button"
 				onClick={handleConsoleClick}
-				className="fixed top-4 right-4 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs text-white shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 hover:shadow-lg transition-all"
+				className="fixed top-6 right-6 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-xs text-primary-foreground bg-primary/90 hover:bg-primary shadow-lg hover:shadow-primary/20 transition-all backdrop-blur-sm"
 				aria-label="Open Cypher Console"
 			>
 				🖥 Console
 			</button>
-			<div className="w-full max-w-3xl relative">
-				<h1 className="text-4xl font-extrabold text-center mb-2 text-slate-800">
-					🏛️ Aurum Art Gallery
+
+			<div className="w-full max-w-5xl relative z-10 px-6 pt-32 pb-16 flex flex-col items-center">
+				{/* Hero Title */}
+				<h1 className="text-6xl md:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 drop-shadow-2xl">
+					Aurum Art Gallery
 				</h1>
-				<p className="text-center text-slate-500 mb-8">
-					Search Artists or Artworks (Example: "Mona Lisa" or "Picasso")
+				<p className="text-center text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl font-light tracking-wide">
+					Discover the masterpieces of history. Search for artists, movements,
+					and timeless artworks.
 				</p>
 
-				<form onSubmit={handleSearch} className="flex flex-col gap-3 mb-10">
-					<div className="flex gap-3">
-						<input
-							type="text"
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-							placeholder="Type keywords to search..."
-							className="flex-1 p-4 rounded-xl border border-slate-300 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
-						/>
-						<button
-							type="submit"
-							disabled={isLoading}
-							className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold transition-colors"
-						>
-							{isLoading ? "..." : "🔍︎"}
-						</button>
+				{/* Search Bar */}
+				<form onSubmit={handleSearch} className="w-full max-w-2xl mb-16">
+					<div className="relative group">
+						<div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+						<div className="relative flex items-center bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5 focus-within:ring-primary/50 transition-all">
+							<input
+								type="text"
+								value={query}
+								onChange={(e) => setQuery(e.target.value)}
+								placeholder="Search for 'Van Gogh', 'Impressionism'..."
+								className="flex-1 bg-transparent px-6 py-5 text-lg text-foreground placeholder:text-muted-foreground/50 outline-none"
+							/>
+							<button
+								type="submit"
+								disabled={isLoading}
+								className="px-8 py-5 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors border-l border-white/5"
+							>
+								{isLoading ? (
+									<span className="animate-pulse">Searching...</span>
+								) : (
+									"Search"
+								)}
+							</button>
+						</div>
 					</div>
-					<label className="flex items-center gap-2 text-sm text-slate-600">
-						<input
-							type="checkbox"
-							checked={useAiSearch}
-							onChange={(e) => setUseAiSearch(e.target.checked)}
-							className="w-4 h-4 accent-blue-600"
-						/>
-						Use AI Search (beta)
-					</label>
+					<div className="mt-4 flex justify-center">
+						<label className="flex items-center gap-3 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+							<div className="relative flex items-center">
+								<input
+									type="checkbox"
+									checked={useAiSearch}
+									onChange={(e) => setUseAiSearch(e.target.checked)}
+									className="peer sr-only"
+								/>
+								<div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary" />
+							</div>
+							<span>Enable AI Semantic Search (Beta)</span>
+						</label>
+					</div>
 				</form>
 
-				<div className="grid gap-4">
+				{/* Results Grid */}
+				<div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{results.map((item) => (
 						<Link
 							key={`${item.type}-${item.linkParam}`}
@@ -112,43 +140,58 @@ export default function Home() {
 									? `/artist/${encodeURIComponent(item.linkParam)}`
 									: `/artwork/${encodeURIComponent(item.linkParam)}`
 							}
-							className="block bg-white p-5 rounded-lg border border-slate-200 hover:shadow-md transition-all hover:border-blue-300 group"
+							className="group relative bg-card/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden hover:bg-card/60 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5"
 						>
-							<div className="flex items-center gap-4">
-								{/* Ikon Pembeda Tipe */}
+							<div className="p-6 flex items-start gap-4">
 								<div
-									className={`w-12 h-12 flex items-center justify-center rounded-full text-xl 
-                  ${item.type === "artist" ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"}`}
+									className={`w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full text-xl border border-white/10 ${
+										item.type === "artist"
+											? "bg-blue-500/10 text-blue-400"
+											: "bg-orange-500/10 text-orange-400"
+									}`}
 								>
 									{item.type === "artist" ? "👤" : "🎨"}
 								</div>
-
-								<div>
-									<div className="flex items-center gap-2">
-										<h2 className="text-lg font-bold text-slate-800 group-hover:text-blue-600">
-											{item.title}
-										</h2>
-										{/* Badge Tipe */}
+								<div className="flex-1 min-w-0">
+									<div className="flex items-center justify-between gap-2 mb-1">
 										<span
-											className={`text-xs px-2 py-0.5 rounded border ${item.type === "artist" ? "border-blue-200 text-blue-600" : "border-orange-200 text-orange-600"}`}
+											className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${
+												item.type === "artist"
+													? "border-blue-500/20 text-blue-400"
+													: "border-orange-500/20 text-orange-400"
+											}`}
 										>
 											{item.type === "artist" ? "Artist" : "Artwork"}
 										</span>
 									</div>
-									<p className="text-slate-500 text-sm mt-1">{item.subtitle}</p>
+									<h2 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">
+										{item.title}
+									</h2>
+									<p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+										{item.subtitle}
+									</p>
 								</div>
 							</div>
 						</Link>
 					))}
-
-					{hasSearched && results.length === 0 && !isLoading && (
-						<div className="text-center text-slate-400 py-10 bg-white rounded-lg border border-dashed border-slate-300">
-							No results found for "{lastSearchedQuery || query}".
-						</div>
-					)}
 				</div>
-				<div className="mt-12 text-center">
-					<p className="text-xs text-slate-400">PROPERTY OF KGTAU</p>
+
+				{hasSearched && results.length === 0 && !isLoading && (
+					<div className="w-full max-w-md text-center py-16 px-6 bg-card/30 backdrop-blur-sm border border-white/5 rounded-2xl">
+						<p className="text-xl text-muted-foreground mb-2">
+							No results found
+						</p>
+						<p className="text-sm text-muted-foreground/60">
+							We couldn&apos;t find anything matching &quot;
+							{lastSearchedQuery || query}&quot;. Try a different keyword.
+						</p>
+					</div>
+				)}
+
+				<div className="mt-24 text-center">
+					<p className="text-xs text-muted-foreground/40 uppercase tracking-widest">
+						Property of KGTAU
+					</p>
 				</div>
 			</div>
 		</main>

@@ -23,13 +23,18 @@ export default async function ArtistPage({ params }: PageProps) {
 	// Jika artist tidak ditemukan
 	if (!artist) {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-800">
-				<div className="text-center">
-					<h1 className="text-2xl font-bold mb-2">Data not found 😔</h1>
-					<p className="mb-4">
-						Sorry, we could not find an artist with the name "{artistName}".
+			<div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+				<div className="text-center p-8 bg-card border border-border rounded-xl shadow-2xl">
+					<h1 className="text-3xl font-serif font-bold mb-4 text-primary">
+						Artist Not Found
+					</h1>
+					<p className="mb-6 text-muted-foreground">
+						We could not find an artist with the name &quot;{artistName}&quot;.
 					</p>
-					<Link href="/" className="text-blue-600 hover:underline">
+					<Link
+						href="/"
+						className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors"
+					>
 						Back to Search
 					</Link>
 				</div>
@@ -47,152 +52,194 @@ export default async function ArtistPage({ params }: PageProps) {
 	].filter((section) => section.items.length > 0);
 
 	return (
-		<div className="min-h-screen bg-white text-slate-900">
-			{/* Header Hitam */}
-			<div className="bg-slate-900 text-white py-16 px-6">
-				<div className="max-w-4xl mx-auto">
+		<div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
+			{/* Header Section */}
+			<div className="relative w-full bg-card border-b border-white/5 overflow-hidden">
+				{/* Abstract Background Pattern */}
+				<div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary via-background to-background" />
+
+				<div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
 					<Link
 						href="/"
-						className="text-slate-400 hover:text-white mb-6 inline-block text-sm font-medium"
+						className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-12 group"
 					>
-						← BACK TO SEARCH
+						<span className="group-hover:-translate-x-1 transition-transform">
+							←
+						</span>
+						BACK TO SEARCH
 					</Link>
 
-					<div className="flex flex-col md:flex-row gap-8 items-start">
+					<div className="flex flex-col lg:flex-row gap-12 items-start">
 						<div className="flex-1">
-							<h1 className="text-5xl font-bold mb-2 tracking-tight">
-								{artist.name}
-							</h1>
-							<p className="text-xl text-slate-400 mb-4">
-								{artist.years} • {artist.nationality || "Unknown"}
-							</p>
-
-							{/* Extra metadata returned from action.ts */}
-							<div className="flex flex-wrap gap-4 mb-6">
-								<span className="text-sm text-slate-300">
-									Total artworks:{" "}
-									<strong className="text-white ml-1">
-										{artist.paintings_count ?? "—"}
-									</strong>
+							<div className="flex flex-wrap items-center gap-4 mb-6">
+								<span className="px-3 py-1 rounded-full border border-primary/30 text-primary text-xs uppercase tracking-widest font-bold bg-primary/5">
+									Artist
 								</span>
-								{artist.school && (
-									<span className="text-sm text-slate-300">
-										School:{" "}
-										<strong className="text-white ml-1">{artist.school}</strong>
-									</span>
-								)}
-							</div>
-
-							<div className="flex flex-wrap gap-2 mb-6">
 								{artist.movements.map((m: string) => (
 									<span
 										key={m}
-										className="bg-blue-600/20 text-blue-300 border border-blue-600/30 px-3 py-1 rounded-full text-sm"
+										className="px-3 py-1 rounded-full border border-white/10 text-muted-foreground text-xs uppercase tracking-widest bg-white/5"
 									>
 										{m}
 									</span>
 								))}
 							</div>
 
-							<div className="prose prose-invert max-w-none">
-								<p className="text-slate-300 leading-relaxed text-lg">
+							<h1 className="text-6xl md:text-8xl font-serif font-bold mb-6 tracking-tight text-foreground leading-none">
+								{artist.name}
+							</h1>
+
+							<div className="flex flex-wrap gap-x-8 gap-y-2 text-lg text-muted-foreground mb-8 font-light">
+								<span>
+									<strong className="text-foreground font-medium">Born:</strong>{" "}
+									{artist.years}
+								</span>
+								<span>
+									<strong className="text-foreground font-medium">
+										Nationality:
+									</strong>{" "}
+									{artist.nationality || "Unknown"}
+								</span>
+								{artist.school && (
+									<span>
+										<strong className="text-foreground font-medium">
+											School:
+										</strong>{" "}
+										{artist.school}
+									</span>
+								)}
+							</div>
+
+							<div className="prose prose-invert prose-lg max-w-none mb-10 text-muted-foreground/80 leading-relaxed">
+								<p className="first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:text-primary first-letter:mr-3 first-letter:float-left">
 									{artist.bio}
 								</p>
 							</div>
 
-							{artist.wikipedia && artist.wikipedia !== "#" && (
-								<a
-									href={artist.wikipedia}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm"
-								>
-									Read more on Wikipedia ↗
-								</a>
-							)}
-
-							{relationSections.length > 0 && (
-								<div className="mt-8 w-full">
-									<h3 className="text-lg font-semibold text-white mb-3">
-										Wikidata Relations
-									</h3>
-									<div className="grid gap-4 sm:grid-cols-2">
-										{relationSections.map((section) => (
-											<div
-												key={section.title}
-												className="bg-slate-800/50 border border-slate-700 rounded-xl p-4"
-											>
-												<p className="text-xs uppercase tracking-wide text-slate-400 mb-3">
-													{section.title}
-												</p>
-												<div className="flex flex-wrap gap-2">
-													{section.items.map((item) => (
-														<Link
-															key={item.name}
-															href={`/artist/${encodeURIComponent(item.name)}`}
-															className="px-3 py-1 rounded-full text-sm bg-white/10 text-white border border-white/20 hover:bg-white/20"
-														>
-															{item.name}
-														</Link>
-													))}
-												</div>
-											</div>
-										))}
-									</div>
-								</div>
-							)}
+							<div className="flex flex-wrap gap-4">
+								{artist.wikipedia && artist.wikipedia !== "#" && (
+									<a
+										href={artist.wikipedia}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium transition-all hover:border-primary/50 hover:text-primary"
+									>
+										Read on Wikipedia ↗
+									</a>
+								)}
+							</div>
 						</div>
+
+						{/* Relations Sidebar */}
+						{relationSections.length > 0 && (
+							<div className="w-full lg:w-80 flex-shrink-0 space-y-6">
+								<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
+									Connections
+								</h3>
+								{relationSections.map((section) => (
+									<div key={section.title}>
+										<p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-bold">
+											{section.title}
+										</p>
+										<div className="flex flex-wrap gap-2">
+											{section.items.map((item) => (
+												<Link
+													key={item.name}
+													href={`/artist/${encodeURIComponent(item.name)}`}
+													className="px-3 py-1.5 rounded-md text-sm bg-card border border-white/10 hover:border-primary/50 hover:text-primary transition-all shadow-sm"
+												>
+													{item.name}
+												</Link>
+											))}
+										</div>
+									</div>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
 
-			{/* Grid Karya Seni */}
-			<div className="max-w-6xl mx-auto px-6 py-12">
-				<h2 className="text-2xl font-bold mb-8 border-b border-slate-200 pb-4 text-slate-800">
-					Famous Works ({artist.artworks.length})
-				</h2>
-
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-					{artist.artworks.map((work) => (
-						<div key={work.id || work.title} className="group">
-							<div className="aspect-4/3 bg-slate-100 rounded-lg overflow-hidden mb-3 relative shadow-sm border border-slate-200">
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								{/* biome-ignore lint/performance/noImgElement: Next.js Image component is not configured yet */}
-								<img
-									src={work.url || placeholder}
-									alt={work.title}
-									className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-									loading="lazy"
-								/>
-							</div>
-							<h3 className="font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
-								{work.title}
-							</h3>
-							<p className="text-xs text-slate-500 mt-1 truncate">
-								{work.info}
-							</p>
-						</div>
-					))}
+			{/* Artworks Section - Masonry Layout */}
+			<div className="max-w-7xl mx-auto px-6 py-24">
+				<div className="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
+					<div>
+						<h2 className="text-4xl font-serif font-bold text-foreground mb-2">
+							Selected Works
+						</h2>
+						<p className="text-muted-foreground">
+							A collection of {artist.artworks.length} masterpieces
+						</p>
+					</div>
 				</div>
 
-				{artist.artworks.length === 0 && (
-					<p className="text-slate-500 italic text-center py-10">
-						No image data available for this artist.
-					</p>
+				{artist.artworks.length > 0 ? (
+					<div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
+						{artist.artworks.map((work) => (
+							<div
+								key={work.id || work.title}
+								className="break-inside-avoid group relative bg-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+							>
+								<div className="relative">
+									{/* eslint-disable-next-line @next/next/no-img-element */}
+									{/* biome-ignore lint/performance/noImgElement: Next.js Image component is not configured yet */}
+									<img
+										src={work.url || placeholder}
+										alt={work.title}
+										className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+										loading="lazy"
+									/>
+									<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+										<h3 className="text-xl font-bold text-white mb-1 font-serif">
+											{work.title}
+										</h3>
+										<p className="text-sm text-gray-300 line-clamp-2">
+											{work.info}
+										</p>
+									</div>
+								</div>
+								{/* Mobile/Default view info (visible when not hovering on desktop, or always visible) */}
+								<div className="p-4 bg-card border-t border-white/5 lg:hidden">
+									<h3 className="font-bold text-foreground">{work.title}</h3>
+									<p className="text-xs text-muted-foreground mt-1">
+										{work.info}
+									</p>
+								</div>
+							</div>
+						))}
+					</div>
+				) : (
+					<div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
+						<p className="text-muted-foreground italic">
+							No artwork images available for this artist.
+						</p>
+					</div>
 				)}
 			</div>
 
-			<div className="max-w-6xl mx-auto px-6 pb-16">
-				<div className="border-t border-slate-200 pt-12">
-					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-						<h2 className="text-2xl font-bold text-slate-800">
-							Relationship Graph
-						</h2>
-						<p className="text-sm text-slate-500">
-							Click node to open detail page.
-						</p>
+			{/* Graph Section */}
+			<div className="bg-card border-t border-white/5 py-24">
+				<div className="max-w-7xl mx-auto px-6">
+					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
+						<div>
+							<h2 className="text-3xl font-serif font-bold text-foreground mb-2">
+								Knowledge Graph
+							</h2>
+							<p className="text-muted-foreground max-w-xl">
+								Explore the connections and influences surrounding {artist.name}
+								. Click on nodes to navigate.
+							</p>
+						</div>
+						<div className="flex items-center gap-2 text-xs text-muted-foreground bg-white/5 px-4 py-2 rounded-full border border-white/10">
+							<span className="w-2 h-2 rounded-full bg-blue-500" /> Artist
+							<span className="w-2 h-2 rounded-full bg-orange-500 ml-2" />{" "}
+							Artwork
+						</div>
 					</div>
-					<GraphViz data={graphData} />
+
+					<div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/50 h-[600px] relative">
+						<GraphViz data={graphData} />
+					</div>
 				</div>
 			</div>
 		</div>

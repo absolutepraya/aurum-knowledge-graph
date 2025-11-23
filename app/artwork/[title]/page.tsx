@@ -19,7 +19,8 @@ export default async function ArtworkPage({ params }: PageProps) {
 				<div className="text-center">
 					<h1 className="text-2xl font-bold mb-2">Data not found 😔</h1>
 					<p className="mb-4">
-						Sorry, we could not find an artwork with the title "{artworkTitle}".
+						Sorry, we could not find an artwork with the title &quot;
+						{artworkTitle}&quot;.
 					</p>
 					<Link href="/" className="text-blue-600 hover:underline">
 						Back to Search
@@ -117,7 +118,7 @@ export default async function ArtworkPage({ params }: PageProps) {
 									href={`/artist/${encodeURIComponent(art.artist.name)}`}
 									className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm"
 								>
-									View {art.artist.name}'s profile ↗
+									View {art.artist.name}&apos;s profile ↗
 								</Link>
 							)}
 						</div>
