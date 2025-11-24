@@ -52,6 +52,9 @@
 	"overrides": {
 		"@vercel/nft": "^0.26.1"
 	},
+	"optionalDependencies": {
+		"@img/sharp-linux-x64": "0.34.5"
+	},
 	"trustedDependencies": [
 		"protobufjs",
 		"sharp",
