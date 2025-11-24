@@ -30,6 +30,30 @@ async function classifyRetrievalIntent(
 	}
 }
 
+function getMessageText(message: {
+	content?: unknown;
+	parts?: Array<{ type: string; text?: string }>;
+}): string {
+	if (typeof message.content === "string") {
+		return message.content;
+	}
+	if (Array.isArray(message.parts)) {
+		const text = message.parts
+			.map((part) => {
+				if (
+					part?.type === "text" &&
+					typeof (part as { text?: unknown }).text === "string"
+				) {
+					return (part as { text: string }).text;
+				}
+				return "";
+			})
+			.join("");
+		return text || "";
+	}
+	return "";
+}
+
 export async function POST(req: Request) {
 	try {
 		const body = await req.json();
@@ -73,10 +97,7 @@ export async function POST(req: Request) {
 			messages.map(({ id, ...message }) => message),
 		);
 
-		const lastUserText =
-			typeof lastUserMessage?.content === "string"
-				? lastUserMessage.content
-				: "";
+		const lastUserText = lastUserMessage ? getMessageText(lastUserMessage) : "";
 		const fallbackUserText = lastUserText || "User sent a multimedia message.";
 		const retrievalIntent = lastUserText
 			? await classifyRetrievalIntent(lastUserText)
