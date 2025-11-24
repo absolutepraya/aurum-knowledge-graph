@@ -28,6 +28,7 @@
 		"react": "19.2.0",
 		"react-dom": "19.2.0",
 		"react-force-graph-2d": "^1.29.0",
+		"react-markdown": "^10.1.0",
 		"react-medium-image-zoom": "^5.4.0",
 		"sharp": "^0.34.5",
 		"tailwindcss-animate": "^1.0.7",

@@ -13,7 +13,7 @@ async function classifyRetrievalIntent(
 	}
 	try {
 		const classification = await generateText({
-			model: google("gemini-1.5-flash"),
+			model: google("gemini-2.5-flash"),
 			temperature: 0,
 			system:
 				"You decide whether the Aurum Museum assistant must consult its knowledge graph. Respond with only retrieve or skip. Use retrieve for any request about artworks, artists, art history, or gallery data. Respond skip for greetings, chit-chat, or messages with no museum-specific question.",
@@ -133,7 +133,7 @@ INSTRUCTIONS:
 		);
 
 		const result = await streamText({
-			model: google("gemini-2.5-pro"),
+			model: google("gemini-2.5-flash"),
 			system: systemPrompt,
 			messages: modelMessages,
 		});
