@@ -33,7 +33,7 @@ export default function RootLayout({
 				className={`${inter.variable} ${playfair.variable} antialiased bg-background text-foreground`}
 			>
 				<AppHeader />
-				<main className="pt-20 min-h-screen">{children}</main>
+				<main className="min-h-screen">{children}</main>
 			</body>
 		</html>
 	);

@@ -24,7 +24,7 @@ export default async function ArtistPage({ params }: PageProps) {
 	// Jika artist tidak ditemukan
 	if (!artist) {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+			<div className="min-h-screen flex items-center justify-center text-foreground">
 				<div className="text-center p-8 bg-card border border-border rounded-xl shadow-2xl">
 					<h1 className="text-3xl font-serif font-bold mb-4 text-primary">
 						Artist Not Found

@@ -77,7 +77,7 @@ function SearchContent() {
 	};
 
 	return (
-		<div className="w-full max-w-5xl relative z-10 px-6 pt-32 pb-16 flex flex-col items-center">
+		<div className="w-full max-w-5xl relative z-10 px-6 pt-52 pb-16 flex flex-col items-center">
 			{/* Hero Title */}
 			<h1 className="text-6xl md:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 drop-shadow-2xl">
 				Aurum Art Gallery

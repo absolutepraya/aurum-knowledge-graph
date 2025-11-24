@@ -48,7 +48,7 @@ export default function ConsolePage() {
 
 	return (
 		<div
-			className={`min-h-screen bg-background text-foreground font-sans transition-all duration-[1200ms] ease-in-out selection:bg-primary/30 ${
+			className={`min-h-screen pt-10 bg-background text-foreground font-sans transition-all duration-1200 ease-in-out selection:bg-primary/30 ${
 				entered
 					? "opacity-100 translate-y-0 scale-100 blur-0"
 					: "opacity-0 translate-y-4 scale-95 blur-sm"
@@ -56,7 +56,7 @@ export default function ConsolePage() {
 		>
 			{/* Background Elements */}
 			<div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-				<div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
+				<div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
 			</div>
 
 			<div className="relative z-10 max-w-6xl mx-auto p-6 lg:p-12">
