@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     image: knowledgegraph-ha
     container_name: knowledgegraph-ha
+    env_file:
+      - .env
     ports:
       - "3009:3000"
     environment:
@@ -12,4 +14,3 @@ services:
       - PORT=3000
       - HOST=0.0.0.0
     restart: unless-stopped
-
