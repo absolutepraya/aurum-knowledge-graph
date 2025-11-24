@@ -1,8 +1,34 @@
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { convertToModelMessages, generateText, streamText } from "ai";
 import { getChatContext } from "@/lib/retrieval";
 
 export const maxDuration = 30;
+
+async function classifyRetrievalIntent(
+	message: string,
+): Promise<"retrieve" | "skip"> {
+	const normalized = message.trim();
+	if (!normalized) {
+		return "retrieve";
+	}
+	try {
+		const classification = await generateText({
+			model: google("gemini-1.5-flash"),
+			temperature: 0,
+			system:
+				"You decide whether the Aurum Museum assistant must consult its knowledge graph. Respond with only retrieve or skip. Use retrieve for any request about artworks, artists, art history, or gallery data. Respond skip for greetings, chit-chat, or messages with no museum-specific question.",
+			prompt: normalized,
+		});
+		const decision = classification.text.trim().toLowerCase();
+		if (decision.startsWith("skip")) {
+			return "skip";
+		}
+		return "retrieve";
+	} catch (error) {
+		console.error("Intent classifier error:", error);
+		return "retrieve";
+	}
+}
 
 export async function POST(req: Request) {
 	try {
@@ -43,13 +69,22 @@ export async function POST(req: Request) {
 			.reverse()
 			.find((message) => message.role === "user");
 
-		const messagesWithoutId = messages.map(({ id, ...message }) => message);
+		const modelMessages = convertToModelMessages(
+			messages.map(({ id, ...message }) => message),
+		);
 
-		const context = await getChatContext(
+		const lastUserText =
 			typeof lastUserMessage?.content === "string"
 				? lastUserMessage.content
-				: "User sent a multimedia message.",
-		);
+				: "";
+		const fallbackUserText = lastUserText || "User sent a multimedia message.";
+		const retrievalIntent = lastUserText
+			? await classifyRetrievalIntent(lastUserText)
+			: "retrieve";
+		const context =
+			retrievalIntent === "retrieve"
+				? await getChatContext(fallbackUserText)
+				: "Classifier marked this turn as small talk; gallery context was not fetched.";
 
 		const systemPrompt = `
 You are an expert Museum Guide for the Aurum Art Gallery.
@@ -69,16 +104,17 @@ INSTRUCTIONS:
 		console.log(
 			"chat-request",
 			JSON.stringify({
-				lastUserMessage: lastUserMessage?.content ?? null,
+				lastUserMessage: lastUserText || null,
 				contextPreview: context.slice(0, 200),
-				messageCount: messagesWithoutId.length,
+				messageCount: modelMessages.length,
+				retrievalIntent,
 			}),
 		);
 
 		const result = await streamText({
 			model: google("gemini-2.5-pro"),
 			system: systemPrompt,
-			messages: messagesWithoutId,
+			messages: modelMessages,
 		});
 
 		return result.toUIMessageStreamResponse();

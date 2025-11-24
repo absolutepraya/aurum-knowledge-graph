@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { Send, Bot } from "lucide-react";
 import {
 	type ChangeEvent,
@@ -12,35 +13,59 @@ import {
 
 export default function ChatPage() {
 	const { messages, sendMessage, status } = useChat({
-		api: "/api/chat",
+		transport: new DefaultChatTransport({
+			api: "/api/chat",
+		}),
 	});
-	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const _messagesEndRef = useRef<HTMLDivElement>(null);
 	const [input, setInput] = useState("");
 	const isLoading = status === "submitted" || status === "streaming";
 
-	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+	const _handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		setInput(event.target.value);
 	};
 
-	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+	const _handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		if (!input.trim() || isLoading) {
 			return;
 		}
-		await sendMessage({ role: "user", content: input });
+		await sendMessage({ text: input });
 		setInput("");
 	};
 
-	const handleSuggestionClick = (suggestion: string) => {
+	const _handleSuggestionClick = (suggestion: string) => {
 		if (isLoading) {
 			return;
 		}
-		void sendMessage({ role: "user", content: suggestion });
+		void sendMessage({ text: suggestion });
 		setInput("");
 	};
 
+	const _getMessageText = (message: (typeof messages)[number]) => {
+		if ("content" in message && typeof message.content === "string") {
+			return message.content;
+		}
+		if (Array.isArray(message.parts)) {
+			const text = message.parts
+				.map((part) => {
+					if (
+						part.type === "text" &&
+						"text" in part &&
+						typeof (part as { text?: unknown }).text === "string"
+					) {
+						return (part as { text: string }).text;
+					}
+					return "";
+				})
+				.join("");
+			return text || "";
+		}
+		return "";
+	};
+
 	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		_messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, []);
 
 	const suggestions = [
@@ -56,7 +81,7 @@ export default function ChatPage() {
 				{messages.length === 0 && (
 					<div className="h-full flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in duration-500">
 						<div className="relative">
-							<div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-primary/20 to-primary/5 flex items-center justify-center rotate-3 transition-transform hover:rotate-6">
+							<div className="w-20 h-20 rounded-2xl bg-linear-to-tr from-primary/20 to-primary/5 flex items-center justify-center rotate-3 transition-transform hover:rotate-6">
 								<Bot className="w-10 h-10 text-primary" />
 							</div>
 							<div className="absolute -inset-1 bg-primary/20 blur-xl -z-10 rounded-full opacity-50" />
@@ -77,7 +102,7 @@ export default function ChatPage() {
 								<button
 									type="button"
 									key={s}
-									onClick={() => handleSuggestionClick(s)}
+									onClick={() => _handleSuggestionClick(s)}
 									className="group p-4 text-sm text-left rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/20 transition-all duration-300"
 								>
 									<span className="block text-foreground/90 group-hover:text-primary transition-colors">
@@ -109,7 +134,7 @@ export default function ChatPage() {
 							}`}
 						>
 							<div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
-								{m.content}
+								{_getMessageText(m)}
 							</div>
 						</div>
 					</div>
@@ -136,18 +161,18 @@ export default function ChatPage() {
 						</div>
 					</div>
 				)}
-				<div ref={messagesEndRef} className="h-4" />
+				<div ref={_messagesEndRef} className="h-4" />
 			</div>
 
 			<div className="mt-6 relative">
 				<form
-					onSubmit={handleSubmit}
+					onSubmit={_handleSubmit}
 					className="relative flex items-center group"
 				>
 					<input
 						className="w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl pl-6 pr-14 py-4 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/30 focus:bg-white/10 transition-all placeholder:text-muted-foreground/50"
 						value={input || ""}
-						onChange={handleInputChange}
+						onChange={_handleInputChange}
 						placeholder="Ask about an artist or artwork..."
 					/>
 					<button
@@ -158,7 +183,7 @@ export default function ChatPage() {
 						<Send className="w-5 h-5" />
 					</button>
 				</form>
-				<div className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-background to-transparent -top-20 pointer-events-none" />
+				<div className="absolute inset-0 -z-10 bg-linear-to-t from-background via-background to-transparent -top-20 pointer-events-none" />
 			</div>
 		</div>
 	);
