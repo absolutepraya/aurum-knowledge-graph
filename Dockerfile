@@ -29,7 +29,8 @@ COPY package.json package-lock.json ./
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY public ./public
-COPY next.config.ts next-env.d.ts ./
+COPY package.json ./
+COPY next.config.ts ./
 EXPOSE 3000
 CMD ["npm", "run", "start"]
 
