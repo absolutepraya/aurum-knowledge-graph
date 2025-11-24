@@ -1,9 +1,17 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+type NextConfigWithTracing = NextConfig & {
+	experimental?: NextConfig["experimental"] & {
+		outputFileTracingIncludes?: Record<string, string[]>;
+	};
+};
+
+const nextConfig: NextConfigWithTracing = {
 	serverExternalPackages: ["@xenova/transformers"],
-	outputFileTracingIncludes: {
-		"/api/console": ["./node_modules/@img/**"],
+	experimental: {
+		outputFileTracingIncludes: {
+			"/api/console": ["./node_modules/@img/**"],
+		},
 	},
 };
 
