@@ -1,0 +1,16 @@
+.git
+.gitignore
+.next
+node_modules
+Dockerfile
+.dockerignore
+*.log
+tmp
+logs
+.env.local
+.env.production.local
+.env.development.local
+.DS_Store
+README.md
+.docs
+
