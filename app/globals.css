@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 :root {
   /* Modern Luxury Palette */
@@ -40,6 +41,18 @@
   
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
+}
+
+/* Custom Utilities */
+@utility scrollbar-hide {
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE and Edge */
+  -ms-overflow-style: none;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 body {

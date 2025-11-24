@@ -2,8 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { ArrowLeft, Terminal } from "lucide-react";
+import { Terminal } from "lucide-react";
 
 export default function ConsolePage() {
 	const [query, setQuery] = useState("MATCH (n) RETURN n LIMIT 5"); // Default query
@@ -64,13 +63,6 @@ export default function ConsolePage() {
 				{/* Header */}
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
 					<div>
-						<Link
-							href="/"
-							className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-4 group"
-						>
-							<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-							BACK TO SEARCH
-						</Link>
 						<h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground flex items-center gap-3 tracking-tight">
 							<Terminal className="w-8 h-8 text-primary" />
 							Cypher Console

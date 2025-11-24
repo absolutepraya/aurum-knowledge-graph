@@ -2,10 +2,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { searchGlobal, type GlobalSearchResult } from "./action";
 import {
-	Terminal,
 	Search,
 	User,
 	Palette,
@@ -31,7 +30,6 @@ function SearchContent() {
 	const searchParams = useSearchParams();
 	const qParam = searchParams.get("q") || "";
 	const [lastQueried, setLastQueried] = useState("");
-	const router = useRouter();
 	const [useAiSearch, setUseAiSearch] = useState(false);
 
 	const performSearch = useCallback(

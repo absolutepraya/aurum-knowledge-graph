@@ -6,6 +6,10 @@ import { usePathname } from "next/navigation";
 export function AppHeader() {
 	const pathname = usePathname();
 
+	if (pathname.startsWith("/artwork") || pathname.startsWith("/artist")) {
+		return null;
+	}
+
 	const navs = [
 		{ name: "Search", href: "/" },
 		{ name: "Chat", href: "/chat" },

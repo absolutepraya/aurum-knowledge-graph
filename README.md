@@ -23,13 +23,13 @@ Create a `.env` file in the root directory (copy from `.env.example`):
 cp .env.example .env
 ```
 
-Fill in your Neo4j credentials and OpenAI API Key in `.env`:
+Fill in your Neo4j credentials and Google Gemini API Key in `.env`:
 
 ```env
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=your_password
-OPENAI_API_KEY=sk-...
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_key
 ```
 
 ### 4. Database Seeding & Enrichment
