@@ -105,6 +105,29 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 					</motion.div>
 
 					<div className="flex flex-col lg:flex-row gap-12 items-start">
+						{/* Artist Image - Desktop (Left Column) / Mobile (Top) */}
+						{artist.image && (
+							<motion.div
+								className="w-full lg:w-1/3 shrink-0"
+								variants={itemVariants}
+							>
+								<div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+									<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+									{/** biome-ignore lint/performance/noImgElement: <x> */}
+									<img
+										src={artist.image}
+										alt={artist.name}
+										className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+									/>
+									<div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+										<p className="text-white/80 text-sm font-medium italic">
+											{artist.name}
+										</p>
+									</div>
+								</div>
+							</motion.div>
+						)}
+
 						<div className="flex-1">
 							<motion.div
 								className="flex flex-wrap items-center gap-4 mb-6"

@@ -21,6 +21,7 @@ export interface GlobalSearchResult {
 export interface ArtistDetail {
 	name: string;
 	bio: string;
+	image: string;
 	nationality: string;
 	years: string;
 	wikipedia: string;
@@ -336,6 +337,7 @@ export async function getArtistDetail(
 			school: a.school,
 			movements: record.get("movements"),
 			artworks,
+			image: a.image || "",
 			influencedBy: record.get("influencedBy") ?? [],
 			influences: record.get("influences") ?? [],
 			mentors: record.get("mentors") ?? [],
