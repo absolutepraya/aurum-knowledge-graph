@@ -1,5 +1,6 @@
 // app/artist/[name]/page.tsx
 import GraphViz from "@/components/GraphViz";
+import ArtworkCard from "@/components/ArtworkCard";
 import { getArtistDetail, getArtistGraphData } from "../../action";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
@@ -209,51 +210,13 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 
 				{artist.artworks.length > 0 ? (
 					<div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
-						{paginatedArtworks.map((work) => {
-							const toTitleCase = (str: string) => {
-								return str.replace(
-									/\w\S*/g,
-									(txt) =>
-										txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(),
-								);
-							};
-
-							return (
-								<Link
-									key={work.id || work.title}
-									href={`/artwork/${encodeURIComponent(work.id)}`}
-									className="break-inside-avoid group relative bg-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 block"
-								>
-									<div className="relative">
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										{/* biome-ignore lint/performance/noImgElement: Next.js Image component is not configured yet */}
-										<img
-											src={work.url || placeholder}
-											alt={work.title}
-											className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-											loading="lazy"
-										/>
-										<div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-											<h3 className="text-xl font-bold text-white mb-1 font-serif">
-												{toTitleCase(work.title)}
-											</h3>
-											<p className="text-sm text-gray-300 line-clamp-2">
-												{work.info ? toTitleCase(work.info) : ""}
-											</p>
-										</div>
-									</div>
-									{/* Mobile/Default view info (visible when not hovering on desktop, or always visible) */}
-									<div className="p-4 bg-card border-t border-white/5 lg:hidden">
-										<h3 className="font-bold text-foreground">
-											{toTitleCase(work.title)}
-										</h3>
-										<p className="text-xs text-muted-foreground mt-1">
-											{work.info ? toTitleCase(work.info) : ""}
-										</p>
-									</div>
-								</Link>
-							);
-						})}
+						{paginatedArtworks.map((work) => (
+							<ArtworkCard
+								key={work.id || work.title}
+								work={work}
+								placeholder={placeholder}
+							/>
+						))}
 					</div>
 				) : (
 					<div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
