@@ -17,7 +17,7 @@ export function AppHeader() {
 	];
 
 	return (
-		<header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-6 py-4 backdrop-blur-md bg-background/80 shadow-sm border-0">
+		<header className="fixed top-4 left-1/2 rounded-xl bg-background/10 -translate-x-1/2 z-50 flex items-center justify-center px-6 py-4 backdrop-blur-md shadow-lg">
 			<nav className="flex items-center gap-14">
 				{navs.map((nav) => (
 					<Link
