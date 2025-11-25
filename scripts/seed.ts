@@ -50,6 +50,35 @@ async function main() {
 	const pass = process.env.NEO4J_PASSWORD || "password";
 	const driver = neo4j.driver(uri, neo4j.auth.basic(user, pass));
 	const session = driver.session();
+
+	// INSERT_YOUR_CODE
+	const readline = await import("node:readline");
+	const rl = readline.createInterface({
+		input: process.stdin,
+		output: process.stdout,
+	});
+
+	async function confirmPrompt(prompt: string): Promise<boolean> {
+		return new Promise((resolve) => {
+			rl.question(`${prompt} (y/n): `, (answer) => {
+				const response = answer.trim().toLowerCase();
+				resolve(response === "y" || response === "yes");
+			});
+		});
+	}
+
+	for (let i = 1; i <= 3; i++) {
+		const confirmed = await confirmPrompt(
+			`Are you sure you want to proceed? Confirmation (${i}/3)`,
+		);
+		if (!confirmed) {
+			console.log("Operation aborted by user.");
+			await rl.close();
+			process.exit(0);
+		}
+	}
+	await rl.close();
+
 	console.log("🚀 Starting Data Import...");
 	console.log(`URI: ${uri}`);
 	console.log(`User: ${user}`);
