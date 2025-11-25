@@ -7,14 +7,20 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 // PENTING: Di Next.js 15, params adalah Promise
 interface PageProps {
 	params: Promise<{ name: string }>;
+	searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function ArtistPage({ params }: PageProps) {
+export default async function ArtistPage({ params, searchParams }: PageProps) {
 	// 1. Tunggu (await) params-nya dulu sebelum dipakai
 	const resolvedParams = await params;
 
 	// 2. Baru decode namanya
 	const artistName = decodeURIComponent(resolvedParams.name);
+	const resolvedSearchParams = searchParams ? await searchParams : {};
+	const pageParamRaw = Array.isArray(resolvedSearchParams.page)
+		? resolvedSearchParams.page[0]
+		: resolvedSearchParams.page;
+	const parsedPage = pageParamRaw ? Number.parseInt(pageParamRaw, 10) : 1;
 
 	const [artist, graphData] = await Promise.all([
 		getArtistDetail(artistName),
@@ -51,6 +57,27 @@ export default async function ArtistPage({ params }: PageProps) {
 		{ title: "Mentors", items: artist.mentors },
 		{ title: "Students", items: artist.students },
 	].filter((section) => section.items.length > 0);
+	const artworksPerPage = 15;
+	const totalArtworks = artist.artworks.length;
+	const totalPages = Math.max(1, Math.ceil(totalArtworks / artworksPerPage));
+	const currentPage = Math.min(
+		totalPages,
+		Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
+	);
+	const startIndex = (currentPage - 1) * artworksPerPage;
+	const paginatedArtworks = artist.artworks.slice(
+		startIndex,
+		startIndex + artworksPerPage,
+	);
+	const displayStart = totalArtworks === 0 ? 0 : startIndex + 1;
+	const displayEnd = Math.min(
+		totalArtworks,
+		startIndex + paginatedArtworks.length,
+	);
+	const getPageHref = (page: number) => ({
+		pathname: `/artist/${encodeURIComponent(artist.name)}`,
+		query: page > 1 ? { page: page.toString() } : undefined,
+	});
 
 	return (
 		<div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
@@ -182,7 +209,7 @@ export default async function ArtistPage({ params }: PageProps) {
 
 				{artist.artworks.length > 0 ? (
 					<div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
-						{artist.artworks.map((work) => {
+						{paginatedArtworks.map((work) => {
 							const toTitleCase = (str: string) => {
 								return str.replace(
 									/\w\S*/g,
@@ -233,6 +260,42 @@ export default async function ArtistPage({ params }: PageProps) {
 						<p className="text-muted-foreground italic">
 							No artwork images available for this artist.
 						</p>
+					</div>
+				)}
+				{artist.artworks.length > 0 && totalPages > 1 && (
+					<div className="mt-12 flex flex-col gap-4">
+						<p className="text-sm text-muted-foreground text-center">
+							Showing {displayStart}–{displayEnd} of {totalArtworks} artworks
+						</p>
+						<div className="flex items-center justify-center gap-4">
+							{currentPage > 1 ? (
+								<Link
+									href={getPageHref(currentPage - 1)}
+									className="px-4 py-2 rounded-full border border-white/10 text-sm font-medium hover:border-primary/50 hover:text-primary transition-colors"
+								>
+									Previous
+								</Link>
+							) : (
+								<span className="px-4 py-2 rounded-full border border-white/5 text-sm text-muted-foreground/70 cursor-not-allowed">
+									Previous
+								</span>
+							)}
+							<span className="text-sm text-muted-foreground">
+								Page {currentPage} of {totalPages}
+							</span>
+							{currentPage < totalPages ? (
+								<Link
+									href={getPageHref(currentPage + 1)}
+									className="px-4 py-2 rounded-full border border-white/10 text-sm font-medium hover:border-primary/50 hover:text-primary transition-colors"
+								>
+									Next
+								</Link>
+							) : (
+								<span className="px-4 py-2 rounded-full border border-white/5 text-sm text-muted-foreground/70 cursor-not-allowed">
+									Next
+								</span>
+							)}
+						</div>
 					</div>
 				)}
 			</div>

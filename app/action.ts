@@ -335,7 +335,7 @@ export async function getArtistDetail(
 			paintings_count: totalPaintings,
 			school: a.school,
 			movements: record.get("movements"),
-			artworks: artworks.slice(0, 20),
+			artworks,
 			influencedBy: record.get("influencedBy") ?? [],
 			influences: record.get("influences") ?? [],
 			mentors: record.get("mentors") ?? [],
