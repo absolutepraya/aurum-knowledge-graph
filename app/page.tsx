@@ -19,8 +19,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "@/lib/animations";
 
-const MotionLink = motion.create(Link);
-
 function SearchContent() {
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<GlobalSearchResult[]>([]);
@@ -208,59 +206,65 @@ function SearchContent() {
 
 			{/* Results Grid */}
 			<motion.div
+				key={JSON.stringify(results)} // Force re-render to trigger stagger
 				className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
 				variants={containerVariants}
+				initial="hidden"
+				animate="visible"
 			>
-				{results.map((item) => (
-					<MotionLink
+				{results.map((item, index) => (
+					<motion.div
 						key={`${item.type}-${item.linkParam}`}
-						href={
-							item.type === "artist"
-								? `/artist/${encodeURIComponent(item.linkParam)}`
-								: `/artwork/${encodeURIComponent(item.linkParam)}`
-						}
-						className="group relative bg-card/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden hover:bg-card/60 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5"
 						variants={itemVariants}
-						initial="hidden"
-						animate="visible"
+						custom={index}
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
+						className="h-full"
 					>
-						<div className="p-6 flex items-start gap-4">
-							<div
-								className={`w-12 h-12 shrink-0 flex items-center justify-center rounded-full text-xl border border-white/10 ${
-									item.type === "artist"
-										? "bg-blue-500/10 text-blue-400"
-										: "bg-orange-500/10 text-orange-400"
-								}`}
-							>
-								{item.type === "artist" ? (
-									<User className="w-6 h-6" />
-								) : (
-									<Palette className="w-6 h-6" />
-								)}
-							</div>
-							<div className="flex-1 min-w-0">
-								<div className="flex items-center justify-between gap-2 mb-1">
-									<span
-										className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${
-											item.type === "artist"
-												? "border-blue-500/20 text-blue-400"
-												: "border-orange-500/20 text-orange-400"
-										}`}
-									>
-										{item.type === "artist" ? "Artist" : "Artwork"}
-									</span>
+						<Link
+							href={
+								item.type === "artist"
+									? `/artist/${encodeURIComponent(item.linkParam)}`
+									: `/artwork/${encodeURIComponent(item.linkParam)}`
+							}
+							className="group relative block h-full bg-card/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden hover:bg-card/60 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5"
+						>
+							<div className="p-6 flex items-start gap-4">
+								<div
+									className={`w-12 h-12 shrink-0 flex items-center justify-center rounded-full text-xl border border-white/10 ${
+										item.type === "artist"
+											? "bg-blue-500/10 text-blue-400"
+											: "bg-orange-500/10 text-orange-400"
+									}`}
+								>
+									{item.type === "artist" ? (
+										<User className="w-6 h-6" />
+									) : (
+										<Palette className="w-6 h-6" />
+									)}
 								</div>
-								<h2 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">
-									{item.title}
-								</h2>
-								<p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-									{item.subtitle}
-								</p>
+								<div className="flex-1 min-w-0">
+									<div className="flex items-center justify-between gap-2 mb-1">
+										<span
+											className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${
+												item.type === "artist"
+													? "border-blue-500/20 text-blue-400"
+													: "border-orange-500/20 text-orange-400"
+											}`}
+										>
+											{item.type === "artist" ? "Artist" : "Artwork"}
+										</span>
+									</div>
+									<h2 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">
+										{item.title}
+									</h2>
+									<p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+										{item.subtitle}
+									</p>
+								</div>
 							</div>
-						</div>
-					</MotionLink>
+						</Link>
+					</motion.div>
 				))}
 			</motion.div>
 

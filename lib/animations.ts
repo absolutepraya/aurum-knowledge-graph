@@ -18,8 +18,8 @@ export const itemVariants: Variants = {
 		opacity: 1,
 		transition: {
 			type: "spring",
-			stiffness: 260, // Much faster (was 100)
-			damping: 20, // Faster settling (was 10)
+			stiffness: 100, // Restore smooth feel
+			damping: 10, // Restore smooth feel
 		},
 	},
 };
