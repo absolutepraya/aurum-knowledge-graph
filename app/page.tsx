@@ -268,6 +268,8 @@ function SearchContent() {
 				<motion.div
 					className="w-full max-w-md text-center py-16 px-6 bg-card/30 backdrop-blur-sm border border-white/5 rounded-2xl"
 					variants={itemVariants}
+					initial="hidden"
+					animate="visible"
 				>
 					<p className="text-xl text-muted-foreground mb-2">No results found</p>
 					<p className="text-sm text-muted-foreground/60">
