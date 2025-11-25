@@ -285,7 +285,7 @@ function SearchContent() {
 
 			<motion.div className="mt-24 text-center" variants={itemVariants}>
 				<p className="text-xs text-muted-foreground/40 uppercase tracking-widest">
-					Property of KGTAU
+					&copy; 2025 Property of KGTAU
 				</p>
 			</motion.div>
 		</motion.div>
