@@ -16,6 +16,34 @@ import {
 import { Suspense } from "react";
 import Link from "next/link";
 
+import { motion, type Variants } from "framer-motion";
+
+const MotionLink = motion.create(Link);
+
+const containerVariants: Variants = {
+	hidden: { opacity: 0 },
+	visible: {
+		opacity: 1,
+		transition: {
+			staggerChildren: 0.1,
+			delayChildren: 0.1,
+		},
+	},
+};
+
+const itemVariants: Variants = {
+	hidden: { y: 20, opacity: 0 },
+	visible: {
+		y: 0,
+		opacity: 1,
+		transition: {
+			type: "spring",
+			stiffness: 100,
+			damping: 10,
+		},
+	},
+};
+
 function SearchContent() {
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<GlobalSearchResult[]>([]);
@@ -77,18 +105,33 @@ function SearchContent() {
 	};
 
 	return (
-		<div className="w-full max-w-5xl relative z-10 px-6 pt-52 pb-16 flex flex-col items-center">
+		<motion.div
+			className="w-full max-w-5xl relative z-10 px-6 pt-52 pb-16 flex flex-col items-center"
+			initial="hidden"
+			animate="visible"
+			variants={containerVariants}
+		>
 			{/* Hero Title */}
-			<h1 className="text-6xl md:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 drop-shadow-2xl">
+			<motion.h1
+				className="text-6xl md:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 drop-shadow-2xl"
+				variants={itemVariants}
+			>
 				Aurum Art Gallery
-			</h1>
-			<p className="text-center text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl font-light tracking-wide">
+			</motion.h1>
+			<motion.p
+				className="text-center text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl font-light tracking-wide"
+				variants={itemVariants}
+			>
 				Discover the masterpieces of history. Search for artists, movements, and
 				timeless artworks.
-			</p>
+			</motion.p>
 
 			{/* Search Bar */}
-			<form onSubmit={handleSearch} className="w-full max-w-4xl mb-16">
+			<motion.form
+				onSubmit={handleSearch}
+				className="w-full max-w-4xl mb-16"
+				variants={itemVariants}
+			>
 				<div className="relative group">
 					<div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
 					<div className="relative flex items-center bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5 focus-within:ring-primary/50 transition-all pr-1 py-0.5">
@@ -184,12 +227,15 @@ function SearchContent() {
 						</span>
 					</label>
 				</div>
-			</form>
+			</motion.form>
 
 			{/* Results Grid */}
-			<div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<motion.div
+				className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+				variants={containerVariants}
+			>
 				{results.map((item) => (
-					<Link
+					<MotionLink
 						key={`${item.type}-${item.linkParam}`}
 						href={
 							item.type === "artist"
@@ -197,6 +243,9 @@ function SearchContent() {
 								: `/artwork/${encodeURIComponent(item.linkParam)}`
 						}
 						className="group relative bg-card/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden hover:bg-card/60 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5"
+						variants={itemVariants}
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
 					>
 						<div className="p-6 flex items-start gap-4">
 							<div
@@ -232,26 +281,29 @@ function SearchContent() {
 								</p>
 							</div>
 						</div>
-					</Link>
+					</MotionLink>
 				))}
-			</div>
+			</motion.div>
 
 			{hasSearched && results.length === 0 && !isLoading && (
-				<div className="w-full max-w-md text-center py-16 px-6 bg-card/30 backdrop-blur-sm border border-white/5 rounded-2xl">
+				<motion.div
+					className="w-full max-w-md text-center py-16 px-6 bg-card/30 backdrop-blur-sm border border-white/5 rounded-2xl"
+					variants={itemVariants}
+				>
 					<p className="text-xl text-muted-foreground mb-2">No results found</p>
 					<p className="text-sm text-muted-foreground/60">
 						We couldn&apos;t find anything matching &quot;
 						{lastSearchedQuery || query}&quot;. Try a different keyword.
 					</p>
-				</div>
+				</motion.div>
 			)}
 
-			<div className="mt-24 text-center">
+			<motion.div className="mt-24 text-center" variants={itemVariants}>
 				<p className="text-xs text-muted-foreground/40 uppercase tracking-widest">
 					Property of KGTAU
 				</p>
-			</div>
-		</div>
+			</motion.div>
+		</motion.div>
 	);
 }
 
