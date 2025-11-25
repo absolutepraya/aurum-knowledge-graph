@@ -11,6 +11,8 @@ import {
 	useRef,
 	useState,
 } from "react";
+import * as motion from "framer-motion/client";
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 export default function ChatPage() {
 	const { messages, sendMessage, status } = useChat({
@@ -80,15 +82,20 @@ export default function ChatPage() {
 		<div className="flex flex-col h-screen max-w-2xl mx-auto px-4 pt-24 pb-6">
 			<div className="flex-1 overflow-y-auto space-y-6 scrollbar-hide">
 				{messages.length === 0 && (
-					<div className="h-full flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in duration-500">
-						<div className="relative">
+					<motion.div
+						className="h-full flex flex-col items-center justify-center text-center space-y-8"
+						initial="hidden"
+						animate="visible"
+						variants={containerVariants}
+					>
+						<motion.div className="relative" variants={itemVariants}>
 							<div className="w-20 h-20 rounded-2xl bg-linear-to-tr from-primary/20 to-primary/5 flex items-center justify-center rotate-3 transition-transform hover:rotate-6">
 								<Bot className="w-10 h-10 text-primary" />
 							</div>
 							<div className="absolute -inset-1 bg-primary/20 blur-xl -z-10 rounded-full opacity-50" />
-						</div>
+						</motion.div>
 
-						<div className="space-y-2 max-w-md">
+						<motion.div className="space-y-2 max-w-md" variants={itemVariants}>
 							<h2 className="text-3xl font-serif font-medium tracking-tight">
 								Aurum Museum Guide
 							</h2>
@@ -96,9 +103,12 @@ export default function ChatPage() {
 								Welcome to the digital collection. I can help you discover
 								artists, analyze artworks, and explore art history.
 							</p>
-						</div>
+						</motion.div>
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg pt-4">
+						<motion.div
+							className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg pt-4"
+							variants={itemVariants}
+						>
 							{suggestions.map((s) => (
 								<button
 									type="button"
@@ -111,16 +121,19 @@ export default function ChatPage() {
 									</span>
 								</button>
 							))}
-						</div>
-					</div>
+						</motion.div>
+					</motion.div>
 				)}
 
 				{messages.map((m) => (
-					<div
+					<motion.div
 						key={m.id}
 						className={`flex gap-4 ${
 							m.role === "user" ? "justify-end" : "justify-start"
-						} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+						}`}
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.3 }}
 					>
 						{m.role !== "user" && (
 							<div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
@@ -138,11 +151,15 @@ export default function ChatPage() {
 								<ReactMarkdown>{_getMessageText(m)}</ReactMarkdown>
 							</div>
 						</div>
-					</div>
+					</motion.div>
 				))}
 
 				{isLoading && (
-					<div className="flex gap-4 justify-start animate-in fade-in duration-300">
+					<motion.div
+						className="flex gap-4 justify-start"
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+					>
 						<div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
 							<Bot className="w-4 h-4 text-primary" />
 						</div>
@@ -160,7 +177,7 @@ export default function ChatPage() {
 								style={{ animationDelay: "300ms" }}
 							/>
 						</div>
-					</div>
+					</motion.div>
 				)}
 				<div ref={_messagesEndRef} className="h-4" />
 			</div>

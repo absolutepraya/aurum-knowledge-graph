@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { Terminal } from "lucide-react";
+import * as motion from "framer-motion/client";
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 export default function ConsolePage() {
 	const [query, setQuery] = useState("MATCH (n) RETURN n LIMIT 5"); // Default query
@@ -59,9 +61,17 @@ export default function ConsolePage() {
 				<div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
 			</div>
 
-			<div className="relative z-10 max-w-6xl mx-auto p-6 lg:p-12">
+			<motion.div
+				className="relative z-10 max-w-6xl mx-auto p-6 lg:p-12"
+				initial="hidden"
+				animate="visible"
+				variants={containerVariants}
+			>
 				{/* Header */}
-				<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+				<motion.div
+					className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12"
+					variants={itemVariants}
+				>
 					<div>
 						<h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground flex items-center gap-3 tracking-tight">
 							<Terminal className="w-8 h-8 text-primary" />
@@ -72,12 +82,15 @@ export default function ConsolePage() {
 							caution.
 						</p>
 					</div>
-				</div>
+				</motion.div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 					{/* Left Column: Input */}
 					<div className="lg:col-span-2 space-y-6">
-						<div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl p-1 shadow-2xl">
+						<motion.div
+							className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl p-1 shadow-2xl"
+							variants={itemVariants}
+						>
 							<div className="bg-black/50 rounded-xl overflow-hidden">
 								<div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
 									<span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
@@ -98,9 +111,9 @@ export default function ConsolePage() {
 									placeholder="// Enter your Cypher query here..."
 								/>
 							</div>
-						</div>
+						</motion.div>
 
-						<div className="flex justify-end">
+						<motion.div className="flex justify-end" variants={itemVariants}>
 							<button
 								type="button"
 								onClick={handleRun}
@@ -119,10 +132,13 @@ export default function ConsolePage() {
 									</>
 								)}
 							</button>
-						</div>
+						</motion.div>
 
 						{/* Result Area */}
-						<div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+						<motion.div
+							className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+							variants={itemVariants}
+						>
 							<div className="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-white/5">
 								<span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
 									Output
@@ -147,12 +163,15 @@ export default function ConsolePage() {
 									{result || "// Results will appear here..."}
 								</pre>
 							</div>
-						</div>
+						</motion.div>
 					</div>
 
 					{/* Right Column: Sidebar/Cheatsheet */}
 					<div className="space-y-6">
-						<div className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+						<motion.div
+							className="bg-card/30 backdrop-blur-md border border-white/10 rounded-2xl p-6"
+							variants={itemVariants}
+						>
 							<h3 className="font-serif font-bold text-lg text-foreground mb-4 border-b border-white/5 pb-2">
 								Example Queries
 							</h3>
@@ -206,19 +225,22 @@ export default function ConsolePage() {
 									</button>
 								</div>
 							</div>
-						</div>
+						</motion.div>
 
-						<div className="bg-primary/5 border border-primary/10 rounded-2xl p-6">
+						<motion.div
+							className="bg-primary/5 border border-primary/10 rounded-2xl p-6"
+							variants={itemVariants}
+						>
 							<h3 className="font-bold text-sm text-primary mb-2">Pro Tip</h3>
 							<p className="text-xs text-muted-foreground leading-relaxed">
 								Use <code className="text-primary">LIMIT</code> to avoid
 								overwhelming the browser with too many results. The graph
 								database contains thousands of nodes.
 							</p>
-						</div>
+						</motion.div>
 					</div>
 				</div>
-			</div>
+			</motion.div>
 		</div>
 	);
 }

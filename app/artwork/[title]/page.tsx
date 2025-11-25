@@ -1,8 +1,9 @@
-// app/artwork/[title]/page.tsx
 import ArtworkImageViewer from "@/components/ArtworkImageViewer";
 import { getArtworkDetail } from "../../action";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import * as motion from "framer-motion/client";
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 interface PageProps {
 	params: Promise<{ title: string }>;
@@ -111,18 +112,28 @@ export default async function ArtworkPage({ params }: PageProps) {
 				<div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
 			</div>
 
-			<div className="relative z-10 max-w-7xl mx-auto w-full px-6 py-12 lg:py-20 flex-1 flex flex-col">
-				<Link
-					href="/"
-					className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-12 group w-fit"
-				>
-					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-					BACK TO SEARCH
-				</Link>
+			<motion.div
+				className="relative z-10 max-w-7xl mx-auto w-full px-6 py-12 lg:py-20 flex-1 flex flex-col"
+				initial="hidden"
+				animate="visible"
+				variants={containerVariants}
+			>
+				<motion.div variants={itemVariants}>
+					<Link
+						href="/"
+						className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-12 group w-fit"
+					>
+						<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+						BACK TO SEARCH
+					</Link>
+				</motion.div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
 					{/* Left Column: Artwork Image */}
-					<div className="w-full lg:sticky lg:top-24">
+					<motion.div
+						className="w-full lg:sticky lg:top-24"
+						variants={itemVariants}
+					>
 						<div className="relative group rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-card/5 backdrop-blur-sm">
 							<ArtworkImageViewer
 								src={art.url}
@@ -133,11 +144,11 @@ export default async function ArtworkPage({ params }: PageProps) {
 						<p className="text-center text-xs text-muted-foreground mt-4 opacity-60">
 							Click image to zoom
 						</p>
-					</div>
+					</motion.div>
 
 					{/* Right Column: Details */}
 					<div className="flex flex-col space-y-8">
-						<div>
+						<motion.div variants={itemVariants}>
 							<div className="flex items-center gap-3 mb-4">
 								<span className="px-3 py-1 rounded-full border border-primary/30 text-primary text-xs uppercase tracking-widest font-bold bg-primary/5">
 									Artwork
@@ -162,11 +173,17 @@ export default async function ArtworkPage({ params }: PageProps) {
 									<ExternalLink className="w-4 h-4" />
 								</Link>
 							)}
-						</div>
+						</motion.div>
 
-						<div className="h-px w-full bg-white/10" />
+						<motion.div
+							className="h-px w-full bg-white/10"
+							variants={itemVariants}
+						/>
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<motion.div
+							className="grid grid-cols-1 md:grid-cols-2 gap-6"
+							variants={itemVariants}
+						>
 							{museumName && (
 								<div>
 									<h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-1 font-bold">
@@ -187,12 +204,18 @@ export default async function ArtworkPage({ params }: PageProps) {
 									</p>
 								</div>
 							)}
-						</div>
+						</motion.div>
 
-						<div className="h-px w-full bg-white/10" />
+						<motion.div
+							className="h-px w-full bg-white/10"
+							variants={itemVariants}
+						/>
 
 						{/* Additional Actions or Info could go here */}
-						<div className="bg-card/30 border border-white/5 rounded-xl p-6 backdrop-blur-md">
+						<motion.div
+							className="bg-card/30 border border-white/5 rounded-xl p-6 backdrop-blur-md"
+							variants={itemVariants}
+						>
 							<h3 className="font-serif font-bold text-lg mb-2 text-primary">
 								About this Piece
 							</h3>
@@ -201,10 +224,10 @@ export default async function ArtworkPage({ params }: PageProps) {
 								works by {art.artist?.name || "this artist"} to understand the
 								context and movement it belongs to.
 							</p>
-						</div>
+						</motion.div>
 					</div>
 				</div>
-			</div>
+			</motion.div>
 		</div>
 	);
 }

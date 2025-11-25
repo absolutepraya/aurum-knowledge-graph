@@ -16,33 +16,10 @@ import {
 import { Suspense } from "react";
 import Link from "next/link";
 
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 const MotionLink = motion.create(Link);
-
-const containerVariants: Variants = {
-	hidden: { opacity: 0 },
-	visible: {
-		opacity: 1,
-		transition: {
-			staggerChildren: 0.1,
-			delayChildren: 0.1,
-		},
-	},
-};
-
-const itemVariants: Variants = {
-	hidden: { y: 20, opacity: 0 },
-	visible: {
-		y: 0,
-		opacity: 1,
-		transition: {
-			type: "spring",
-			stiffness: 100,
-			damping: 10,
-		},
-	},
-};
 
 function SearchContent() {
 	const [query, setQuery] = useState("");
@@ -244,6 +221,8 @@ function SearchContent() {
 						}
 						className="group relative bg-card/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden hover:bg-card/60 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5"
 						variants={itemVariants}
+						initial="hidden"
+						animate="visible"
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
 					>

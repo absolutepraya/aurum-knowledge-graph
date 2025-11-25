@@ -1,9 +1,10 @@
-// app/artist/[name]/page.tsx
 import GraphViz from "@/components/GraphViz";
 import ArtworkCard from "@/components/ArtworkCard";
 import { getArtistDetail, getArtistGraphData } from "../../action";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import * as motion from "framer-motion/client";
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 // PENTING: Di Next.js 15, params adalah Promise
 interface PageProps {
@@ -87,18 +88,28 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 				{/* Abstract Background Pattern */}
 				<div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-primary via-background to-background" />
 
-				<div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
-					<Link
-						href="/"
-						className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-12 group"
-					>
-						<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-						BACK TO SEARCH
-					</Link>
+				<motion.div
+					className="max-w-7xl mx-auto px-6 py-20 relative z-10"
+					initial="hidden"
+					animate="visible"
+					variants={containerVariants}
+				>
+					<motion.div variants={itemVariants}>
+						<Link
+							href="/"
+							className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-12 group"
+						>
+							<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+							BACK TO SEARCH
+						</Link>
+					</motion.div>
 
 					<div className="flex flex-col lg:flex-row gap-12 items-start">
 						<div className="flex-1">
-							<div className="flex flex-wrap items-center gap-4 mb-6">
+							<motion.div
+								className="flex flex-wrap items-center gap-4 mb-6"
+								variants={itemVariants}
+							>
 								<span className="px-3 py-1 rounded-full border border-primary/30 text-primary text-xs uppercase tracking-widest font-bold bg-primary/5">
 									Artist
 								</span>
@@ -110,13 +121,19 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 										{m}
 									</span>
 								))}
-							</div>
+							</motion.div>
 
-							<h1 className="text-6xl md:text-8xl font-serif font-bold mb-6 tracking-tight text-foreground leading-none">
+							<motion.h1
+								className="text-6xl md:text-8xl font-serif font-bold mb-6 tracking-tight text-foreground leading-none"
+								variants={itemVariants}
+							>
 								{artist.name}
-							</h1>
+							</motion.h1>
 
-							<div className="flex flex-wrap gap-x-8 gap-y-2 text-lg text-muted-foreground mb-8 font-light">
+							<motion.div
+								className="flex flex-wrap gap-x-8 gap-y-2 text-lg text-muted-foreground mb-8 font-light"
+								variants={itemVariants}
+							>
 								<span>
 									<strong className="text-foreground font-medium">Born:</strong>{" "}
 									{artist.years}
@@ -136,15 +153,21 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 											artist.school.slice(1)}
 									</span>
 								)}
-							</div>
+							</motion.div>
 
-							<div className="prose prose-invert prose-lg max-w-none mb-10 text-muted-foreground/80 leading-relaxed">
+							<motion.div
+								className="prose prose-invert prose-lg max-w-none mb-10 text-muted-foreground/80 leading-relaxed"
+								variants={itemVariants}
+							>
 								<p className="first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:text-primary first-letter:mr-3 first-letter:float-left">
 									{artist.bio.replace(/ \(listen\)/g, "")}
 								</p>
-							</div>
+							</motion.div>
 
-							<div className="flex flex-wrap gap-4">
+							<motion.div
+								className="flex flex-wrap gap-4"
+								variants={itemVariants}
+							>
 								{artist.wikipedia && artist.wikipedia !== "#" && (
 									<a
 										href={artist.wikipedia}
@@ -162,12 +185,15 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 										Read on Wikipedia <ExternalLink className="w-4 h-4" />
 									</a>
 								)}
-							</div>
+							</motion.div>
 						</div>
 
 						{/* Relations Sidebar */}
 						{relationSections.length > 0 && (
-							<div className="w-full lg:w-80 shrink-0 space-y-6">
+							<motion.div
+								className="w-full lg:w-80 shrink-0 space-y-6"
+								variants={itemVariants}
+							>
 								<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
 									Connections
 								</h3>
@@ -189,15 +215,24 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 										</div>
 									</div>
 								))}
-							</div>
+							</motion.div>
 						)}
 					</div>
-				</div>
+				</motion.div>
 			</div>
 
 			{/* Artworks Section - Masonry Layout */}
-			<div className="max-w-7xl mx-auto px-6 py-24">
-				<div className="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
+			<motion.div
+				className="max-w-7xl mx-auto px-6 py-24"
+				initial="hidden"
+				whileInView="visible"
+				viewport={{ once: true, margin: "-100px" }}
+				variants={containerVariants}
+			>
+				<motion.div
+					className="flex items-end justify-between mb-12 border-b border-white/10 pb-6"
+					variants={itemVariants}
+				>
 					<div>
 						<h2 className="text-4xl font-serif font-bold text-foreground mb-2">
 							Selected Works
@@ -206,18 +241,19 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							A collection of {artist.artworks.length} masterpieces
 						</p>
 					</div>
-				</div>
+				</motion.div>
 
 				{artist.artworks.length > 0 ? (
-					<div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
+					<motion.div
+						className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8"
+						variants={containerVariants}
+					>
 						{paginatedArtworks.map((work) => (
-							<ArtworkCard
-								key={work.id || work.title}
-								work={work}
-								placeholder={placeholder}
-							/>
+							<motion.div key={work.id || work.title} variants={itemVariants}>
+								<ArtworkCard work={work} placeholder={placeholder} />
+							</motion.div>
 						))}
-					</div>
+					</motion.div>
 				) : (
 					<div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
 						<p className="text-muted-foreground italic">
@@ -226,7 +262,10 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 					</div>
 				)}
 				{artist.artworks.length > 0 && totalPages > 1 && (
-					<div className="mt-12 flex flex-col gap-4">
+					<motion.div
+						className="mt-12 flex flex-col gap-4"
+						variants={itemVariants}
+					>
 						<p className="text-sm text-muted-foreground text-center">
 							Showing {displayStart}–{displayEnd} of {totalArtworks} artworks
 						</p>
@@ -259,14 +298,23 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 								</span>
 							)}
 						</div>
-					</div>
+					</motion.div>
 				)}
-			</div>
+			</motion.div>
 
 			{/* Graph Section */}
-			<div className="bg-card border-t border-white/5 py-24">
+			<motion.div
+				className="bg-card border-t border-white/5 py-24"
+				initial="hidden"
+				whileInView="visible"
+				viewport={{ once: true }}
+				variants={containerVariants}
+			>
 				<div className="max-w-7xl mx-auto px-6">
-					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
+					<motion.div
+						className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12"
+						variants={itemVariants}
+					>
 						<div>
 							<h2 className="text-3xl font-serif font-bold text-foreground mb-2">
 								Knowledge Graph
@@ -281,13 +329,16 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							<span className="w-2 h-2 rounded-full bg-[#ededed] ml-2" />{" "}
 							Artwork
 						</div>
-					</div>
+					</motion.div>
 
-					<div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/50 h-[600px] relative">
+					<motion.div
+						className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/50 h-[600px] relative"
+						variants={itemVariants}
+					>
 						<GraphViz data={graphData} />
-					</div>
+					</motion.div>
 				</div>
-			</div>
+			</motion.div>
 		</div>
 	);
 }
