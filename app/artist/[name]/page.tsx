@@ -245,17 +245,8 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 			</div>
 
 			{/* Artworks Section - Masonry Layout */}
-			<motion.div
-				className="max-w-7xl mx-auto px-6 py-24"
-				initial="hidden"
-				whileInView="visible"
-				viewport={{ once: true, margin: "-100px" }}
-				variants={containerVariants}
-			>
-				<motion.div
-					className="flex items-end justify-between mb-12 border-b border-white/10 pb-6"
-					variants={itemVariants}
-				>
+			<div className="max-w-7xl mx-auto px-6 py-24">
+				<div className="flex items-end justify-between mb-12 border-b border-white/10 pb-6">
 					<div>
 						<h2 className="text-4xl font-serif font-bold text-foreground mb-2">
 							Selected Works
@@ -264,19 +255,16 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							A collection of {artist.artworks.length} masterpieces
 						</p>
 					</div>
-				</motion.div>
+				</div>
 
 				{artist.artworks.length > 0 ? (
-					<motion.div
-						className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8"
-						variants={containerVariants}
-					>
+					<div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
 						{paginatedArtworks.map((work) => (
-							<motion.div key={work.id || work.title} variants={itemVariants}>
+							<div key={work.id || work.title}>
 								<ArtworkCard work={work} placeholder={placeholder} />
-							</motion.div>
+							</div>
 						))}
-					</motion.div>
+					</div>
 				) : (
 					<div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
 						<p className="text-muted-foreground italic">
@@ -285,10 +273,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 					</div>
 				)}
 				{artist.artworks.length > 0 && totalPages > 1 && (
-					<motion.div
-						className="mt-12 flex flex-col gap-4"
-						variants={itemVariants}
-					>
+					<div className="mt-12 flex flex-col gap-4">
 						<p className="text-sm text-muted-foreground text-center">
 							Showing {displayStart}–{displayEnd} of {totalArtworks} artworks
 						</p>
@@ -321,16 +306,15 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 								</span>
 							)}
 						</div>
-					</motion.div>
+					</div>
 				)}
-			</motion.div>
+			</div>
 
 			{/* Graph Section */}
 			<motion.div
 				className="bg-card border-t border-white/5 py-24"
 				initial="hidden"
-				whileInView="visible"
-				viewport={{ once: true }}
+				animate="visible"
 				variants={containerVariants}
 			>
 				<div className="max-w-7xl mx-auto px-6">
