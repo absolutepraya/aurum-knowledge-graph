@@ -120,6 +120,26 @@ async function fetchWikidataId(
 	return null;
 }
 
+async function fetchArtistImage(qid: string): Promise<string | null> {
+	const query = `
+      SELECT ?image WHERE {
+        wd:${qid} wdt:P18 ?image .
+      }
+      LIMIT 1
+    `;
+
+	try {
+		const data = await runSparql(query);
+		const bindings = data?.results?.bindings || [];
+		if (bindings.length > 0 && bindings[0].image?.value) {
+			return bindings[0].image.value;
+		}
+	} catch (error) {
+		console.error(`⚠️ Error fetching image for ${qid}:`, error);
+	}
+	return null;
+}
+
 async function fetchRelations(qid: string): Promise<RelationResult[]> {
 	const types = [
 		{ prop: "P737", rel: "INFLUENCED_BY" as const },
@@ -136,22 +156,29 @@ async function fetchRelations(qid: string): Promise<RelationResult[]> {
         }
         LIMIT ${RELATION_LIMIT}
       `;
-		const data = await runSparql(query);
-		const simplified = wbk.simplify.sparqlResults(data);
-		for (const row of simplified) {
-			const related = row.related;
-			const relatedLabel = row.relatedLabel;
-			if (!related || typeof related !== "string") continue;
-			const uri = related;
-			if (!uri) continue;
-			const id = uri.split("/").pop();
-			if (!id) continue;
-			all.push({
-				id,
-				label:
-					(typeof relatedLabel === "string" ? relatedLabel : undefined) || id,
-				type: rel,
-			});
+
+		try {
+			const data = await runSparql(query);
+			const bindings = data?.results?.bindings || [];
+
+			for (const binding of bindings) {
+				const relatedUri = binding.related?.value;
+				const relatedLabel = binding.relatedLabel?.value;
+
+				if (!relatedUri) continue;
+
+				const id = relatedUri.split("/").pop();
+
+				if (!id || !/^Q\d+$/.test(id)) continue;
+
+				all.push({
+					id,
+					label: relatedLabel || id,
+					type: rel,
+				});
+			}
+		} catch (error) {
+			console.error(`⚠️ Error fetching ${rel} for ${qid}:`, error);
 		}
 	}
 	return all;
@@ -161,7 +188,19 @@ async function fetchArtistsWithoutId(session: Session): Promise<string[]> {
 	const result = await session.run(
 		`
       MATCH (a:Artist)
-      WHERE a.wikidata_id IS NULL
+      WHERE 
+        a.wikidata_id IS NULL 
+        OR 
+        (
+            a.wikidata_id IS NOT NULL 
+            AND a.wikidata_id <> 'Not Found' 
+            AND (
+                (NOT (a)-[:INFLUENCED_BY]->() AND NOT (a)-[:STUDENT_OF]->())
+                OR 
+                a.image IS NULL
+            )
+        )
+      
       RETURN a.name AS name
       LIMIT $limit
     `,
@@ -174,17 +213,20 @@ async function updateArtistWikidata(
 	session: Session,
 	name: string,
 	match: WikidataMatch,
+	imageUrl: string | null,
 ) {
 	await session.run(
 		`
       MATCH (a:Artist {name: $name})
       SET a.wikidata_id = $id,
-          a.wikidata_label = coalesce(a.wikidata_label, $label)
+          a.wikidata_label = coalesce(a.wikidata_label, $label),
+          a.image = $imageUrl
     `,
 		{
 			name,
 			id: match.id,
 			label: match.label,
+			imageUrl: imageUrl,
 		},
 	);
 }
@@ -226,11 +268,25 @@ async function connectRelation(
 async function syncWikidata(session: Session, name: string) {
 	const match = await fetchWikidataId(name);
 	if (!match) {
-		console.warn(`⚠️  No Wikidata match for ${name}`);
+		console.warn(
+			`⚠️  No Wikidata match for ${name} (Setting id to 'Not Found')`,
+		);
+
+		await session.run(
+			`MATCH (a:Artist {name: $name}) SET a.wikidata_id = 'Not Found'`,
+			{ name },
+		);
 		return;
 	}
-	await updateArtistWikidata(session, name, match);
-	console.log(`✓ Linked ${name} -> ${match.id}`);
+
+	const imageUrl = await fetchArtistImage(match.id);
+	await updateArtistWikidata(session, name, match, imageUrl);
+
+	if (imageUrl) {
+		console.log(`✓ Linked ${name} -> ${match.id} (with Image 📸)`);
+	} else {
+		console.log(`✓ Linked ${name} -> ${match.id}`);
+	}
 
 	const relations = await fetchRelations(match.id);
 	for (const relation of relations) {
