@@ -193,14 +193,11 @@ async function fetchArtistsWithoutId(session: Session): Promise<string[]> {
         OR 
         (
             a.wikidata_id IS NOT NULL 
-            AND a.wikidata_id <> 'Not Found' 
+            AND a.wikidata_id <> 'Not Found'
             AND (
-                (NOT (a)-[:INFLUENCED_BY]->() AND NOT (a)-[:STUDENT_OF]->())
-                OR 
                 a.image IS NULL
             )
         )
-      
       RETURN a.name AS name
       LIMIT $limit
     `,
@@ -280,12 +277,28 @@ async function syncWikidata(session: Session, name: string) {
 	}
 
 	const imageUrl = await fetchArtistImage(match.id);
-	await updateArtistWikidata(session, name, match, imageUrl);
+	const imageValueToSave = imageUrl ? imageUrl : "Not Found";
 
+	await session.run(
+		`
+        MATCH (a:Artist {name: $name})
+        SET a.wikidata_id = $id,
+            a.wikidata_label = coalesce(a.wikidata_label, $label),
+            a.image = $image 
+        `,
+		{
+			name,
+			id: match.id,
+			label: match.label,
+			image: imageValueToSave,
+		},
+	);
+
+	// Logging
 	if (imageUrl) {
 		console.log(`✓ Linked ${name} -> ${match.id} (with Image 📸)`);
 	} else {
-		console.log(`✓ Linked ${name} -> ${match.id}`);
+		console.log(`✓ Linked ${name} -> ${match.id} (No Image found)`);
 	}
 
 	const relations = await fetchRelations(match.id);
