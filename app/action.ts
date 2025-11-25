@@ -3,6 +3,7 @@
 
 // Use relative path so the module resolves at runtime
 import { embedText } from "../lib/embeddings";
+import { rerank } from "../lib/rerank";
 import { getSession } from "../lib/neo4j";
 import type { Node, Record } from "neo4j-driver";
 
@@ -225,6 +226,36 @@ export async function searchGlobal(
 		// If sorting is A-Z or Z-A, we should sort the combined list.
 		keywordResults.forEach(pushUnique);
 		semanticResults.forEach(pushUnique);
+
+		// RERANKING STEP (Only if sorting by relevance and we have results)
+		// We only rerank the top candidates to save performance
+		if (sort === "relevance" && combined.length > 0) {
+			try {
+				// 1. Prepare documents for reranking (Title + Subtitle gives good context)
+				const docsToRerank = combined.map((item) =>
+					`${item.title} ${item.subtitle}`.trim(),
+				);
+
+				// 2. Get scores
+				const scores = await rerank(keyword, docsToRerank);
+
+				// 3. Attach scores to items (temporarily) to sort
+				const withScores = combined.map((item, index) => ({
+					...item,
+					_score: scores[index] || 0,
+				}));
+
+				// 4. Sort by score descending
+				withScores.sort((a, b) => b._score - a._score);
+
+				// 5. Clean up (remove _score) and reassign to combined
+				// Note: TypeScript might complain if we don't cast back or map
+				return withScores.map(({ _score, ...item }) => item);
+			} catch (err) {
+				console.warn("Reranking skipped due to error:", err);
+				// Fallback to original order if reranking fails
+			}
+		}
 
 		if (sort === "az") {
 			combined.sort((a, b) => a.title.localeCompare(b.title));
