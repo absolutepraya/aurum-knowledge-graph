@@ -1,24 +1,23 @@
 "use server";
 
-import { pipeline } from "@xenova/transformers";
+import { embedText } from "./embeddings";
 
-// Helper to keep the pipeline in memory
-// biome-ignore lint/suspicious/noExplicitAny: Pipeline type inference is tricky
-let reranker: any = null;
-
-async function getReranker() {
-	if (!reranker) {
-		// Using the cross-encoder model as specified/recommended for reranking tasks
-		reranker = await pipeline(
-			"text-classification",
-			"Xenova/cross-encoder-ms-marco-MiniLM-L-6-v2",
-		);
+/**
+ * Calculates the cosine similarity between two vectors.
+ */
+function cosineSimilarity(vecA: number[], vecB: number[]): number {
+	if (vecA.length !== vecB.length) return 0;
+	let dot = 0;
+	for (let i = 0; i < vecA.length; i++) {
+		dot += vecA[i] * vecB[i];
 	}
-	return reranker;
+	// Assuming vectors are already normalized by embedText
+	return dot;
 }
 
 /**
- * Reranks a list of documents based on their relevance to a query.
+ * Reranks a list of documents based on their semantic similarity to a query.
+ * Uses the existing Bi-Encoder model from embeddings.ts to avoid downloading new models.
  * Returns an array of scores corresponding to the documents.
  */
 export async function rerank(
@@ -28,33 +27,22 @@ export async function rerank(
 	if (!query || !documents.length) return [];
 
 	try {
-		const pipe = await getReranker();
+		// 1. Embed the query once
+		const queryVector = await embedText(query);
+		if (!queryVector.length) return new Array(documents.length).fill(0);
 
-		// Construct inputs for the cross-encoder: pairs of [query, document]
-		// The pipeline expects { text: string, text_pair: string } for pair classification
-		const inputs = documents.map((doc) => ({
-			text: query,
-			text_pair: doc,
-		}));
+		// 2. Embed all documents (in parallel for speed)
+		const docVectors = await Promise.all(
+			documents.map((doc) => embedText(doc)),
+		);
 
-		// Run the model
-		// output is typically an array of objects { label: string, score: number }
-		// for ms-marco, it might just return the score or a 'relevant' label score.
-		const output = await pipe(inputs);
-
-		// Extract scores.
-		// If output is array of results, mapping them to number.
-		// Structure usually: [{ label: 'LABEL_0', score: 0.1 }, ...] or just scores for regression.
-		// cross-encoder-ms-marco-MiniLM-L-6-v2 is trained for classification (relevant/not relevant) or regression?
-		// Usually it outputs a score. Let's handle the common structure.
-		// biome-ignore lint/suspicious/noExplicitAny: Output structure varies
-		return output.map((res: any) => {
-			if (typeof res === "number") return res;
-			if (res?.score) return res.score;
-			// If it returns a list of labels (e.g. LABEL_0, LABEL_1), we want the score of the positive label.
-			// But ms-marco models on HF usually output a single logit/score.
-			return 0;
+		// 3. Calculate cosine similarity for each document
+		const scores = docVectors.map((docVector) => {
+			if (!docVector.length) return 0;
+			return cosineSimilarity(queryVector, docVector);
 		});
+
+		return scores;
 	} catch (error) {
 		console.error("Reranking error:", error);
 		// Return 0s in case of failure so the app doesn't crash
