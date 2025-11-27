@@ -105,12 +105,13 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 					</motion.div>
 
 					<div className="flex flex-col lg:flex-row gap-12 items-start">
-						{/* Artist Image - Desktop (Left Column) / Mobile (Top) */}
-						{artist.image && (
-							<motion.div
-								className="w-full lg:w-1/3 shrink-0"
-								variants={itemVariants}
-							>
+						{/* Left Column: Image & Connections */}
+						<motion.div
+							className="w-full lg:w-1/3 shrink-0 space-y-8"
+							variants={itemVariants}
+						>
+							{/* Artist Image */}
+							{artist.image && (
 								<div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
 									<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
 									{/** biome-ignore lint/performance/noImgElement: <x> */}
@@ -125,9 +126,37 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 										</p>
 									</div>
 								</div>
-							</motion.div>
-						)}
+							)}
 
+							{/* Connections (Moved from Right Column) */}
+							{relationSections.length > 0 && (
+								<div className="space-y-6">
+									<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
+										Connections
+									</h3>
+									{relationSections.map((section) => (
+										<div key={section.title}>
+											<p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-bold">
+												{section.title}
+											</p>
+											<div className="flex flex-wrap gap-2">
+												{section.items.map((item) => (
+													<Link
+														key={item.name}
+														href={`/artist/${encodeURIComponent(item.name)}`}
+														className="px-3 py-1.5 rounded-md text-sm bg-card border border-white/10 hover:border-primary/50 hover:text-primary transition-all shadow-sm"
+													>
+														{item.name}
+													</Link>
+												))}
+											</div>
+										</div>
+									))}
+								</div>
+							)}
+						</motion.div>
+
+						{/* Right Column: Bio & Details */}
 						<div className="flex-1">
 							<motion.div
 								className="flex flex-wrap items-center gap-4 mb-6"
@@ -210,36 +239,6 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 								)}
 							</motion.div>
 						</div>
-
-						{/* Relations Sidebar */}
-						{relationSections.length > 0 && (
-							<motion.div
-								className="w-full lg:w-80 shrink-0 space-y-6"
-								variants={itemVariants}
-							>
-								<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
-									Connections
-								</h3>
-								{relationSections.map((section) => (
-									<div key={section.title}>
-										<p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-bold">
-											{section.title}
-										</p>
-										<div className="flex flex-wrap gap-2">
-											{section.items.map((item) => (
-												<Link
-													key={item.name}
-													href={`/artist/${encodeURIComponent(item.name)}`}
-													className="px-3 py-1.5 rounded-md text-sm bg-card border border-white/10 hover:border-primary/50 hover:text-primary transition-all shadow-sm"
-												>
-													{item.name}
-												</Link>
-											))}
-										</div>
-									</div>
-								))}
-							</motion.div>
-						)}
 					</div>
 				</motion.div>
 			</div>
