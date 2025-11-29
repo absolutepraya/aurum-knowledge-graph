@@ -11,6 +11,7 @@ import {
 	Sparkles,
 	ListFilter,
 	ArrowDownNarrowWide,
+	ArrowRight,
 } from "lucide-react";
 
 import { Suspense } from "react";
@@ -88,7 +89,7 @@ function SearchContent() {
 		>
 			{/* Hero Title */}
 			<motion.h1
-				className="text-4xl md:text-6xl lg:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 drop-shadow-2xl"
+				className="text-6xl md:text-8xl font-serif font-bold text-center mb-4 tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 drop-shadow-2xl"
 				variants={itemVariants}
 			>
 				Aurum Art Gallery
@@ -124,17 +125,25 @@ function SearchContent() {
 							className="px-6 md:px-8 py-4 md:py-5 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors border-l border-white/5 rounded-xl text-sm md:text-base"
 						>
 							{isLoading ? (
-								<span className="animate-pulse">Searching...</span>
+								<>
+									<span className="hidden md:inline animate-pulse">
+										Searching...
+									</span>
+									<ArrowRight className="md:hidden w-5 h-5 animate-pulse" />
+								</>
 							) : (
-								"Search"
+								<>
+									<span className="hidden md:inline">Search</span>
+									<ArrowRight className="md:hidden w-5 h-5" />
+								</>
 							)}
 						</button>
 					</div>
 				</div>
 
 				{/* Filters & Options */}
-				<div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 px-2 w-full">
-					<div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+				<div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 px-2 w-full">
+					<div className="flex flex-col sm:flex-row items-center gap-2 md:gap-4 w-full md:w-auto">
 						{/* Filter Dropdown */}
 						<div className="flex items-center gap-2 bg-card/30 backdrop-blur-md border border-white/10 rounded-lg p-1 pl-3">
 							<ListFilter className="w-4 h-4 text-muted-foreground" />
@@ -144,7 +153,6 @@ function SearchContent() {
 									key={f}
 									type="button"
 									onClick={() => {
-										ar;
 										setFilter(f);
 										if (query) performSearch(query, useAiSearch, f, sort);
 									}}
@@ -208,7 +216,7 @@ function SearchContent() {
 			{/* Results Grid */}
 			<motion.div
 				key={JSON.stringify(results)} // Force re-render to trigger stagger
-				className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+				className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-10"
 				variants={containerVariants}
 				initial="hidden"
 				animate="visible"
