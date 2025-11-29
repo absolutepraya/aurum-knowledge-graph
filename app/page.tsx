@@ -115,7 +115,7 @@ function SearchContent() {
 							type="text"
 							value={query}
 							onChange={(e) => setQuery(e.target.value)}
-							placeholder="Search for 'Van Gogh', 'Impressionism'..."
+							placeholder="Search for 'Van Gogh', 'Boulevard Des Capucines'..."
 							className="flex-1 bg-transparent pl-16 pr-6 py-5 text-lg text-foreground placeholder:text-muted-foreground/50 outline-none"
 						/>
 						<button
