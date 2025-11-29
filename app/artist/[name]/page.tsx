@@ -89,7 +89,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 				<div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-primary via-background to-background" />
 
 				<motion.div
-					className="max-w-7xl mx-auto px-6 py-20 relative z-10"
+					className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20 relative z-10"
 					initial="hidden"
 					animate="visible"
 					variants={containerVariants}
@@ -104,7 +104,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 						</Link>
 					</motion.div>
 
-					<div className="flex flex-col lg:flex-row gap-12 items-start">
+					<div className="flex flex-col lg:flex-row gap-4 md:gap-12 items-start">
 						{/* Left Column: Image & Connections */}
 						<motion.div
 							className="w-full lg:w-1/3 shrink-0 space-y-8"
@@ -128,9 +128,9 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 								</div>
 							)}
 
-							{/* Connections (Moved from Right Column) */}
+							{/* Connections (Moved from Right Column) - Desktop Only */}
 							{relationSections.length > 0 && (
-								<div className="space-y-6">
+								<div className="space-y-6 hidden lg:block">
 									<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
 										Connections
 									</h3>
@@ -176,7 +176,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							</motion.div>
 
 							<motion.h1
-								className="text-6xl md:text-8xl font-serif font-bold mb-6 tracking-tight text-foreground leading-none"
+								className="text-4xl md:text-6xl lg:text-8xl font-serif font-bold mb-4 md:mb-6 tracking-tight text-foreground leading-none"
 								variants={itemVariants}
 							>
 								{artist.name}
@@ -208,7 +208,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							</motion.div>
 
 							<motion.div
-								className="prose prose-invert prose-lg max-w-none mb-10 text-muted-foreground/80 leading-relaxed"
+								className="prose prose-invert prose-lg max-w-none md:mb-10 mb-4 text-muted-foreground/80 leading-relaxed"
 								variants={itemVariants}
 							>
 								<p className="first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:text-primary first-letter:mr-3 first-letter:float-left">
@@ -217,7 +217,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							</motion.div>
 
 							<motion.div
-								className="flex flex-wrap gap-4"
+								className="flex flex-wrap gap-4 mb-8 md:mb-0"
 								variants={itemVariants}
 							>
 								{artist.wikipedia && artist.wikipedia !== "#" && (
@@ -238,6 +238,33 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 									</a>
 								)}
 							</motion.div>
+
+							{/* Connections (Mobile Only - Swapped Order) */}
+							{relationSections.length > 0 && (
+								<div className="space-y-6 mt-8 lg:hidden">
+									<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
+										Connections
+									</h3>
+									{relationSections.map((section) => (
+										<div key={section.title}>
+											<p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-bold">
+												{section.title}
+											</p>
+											<div className="flex flex-wrap gap-2">
+												{section.items.map((item) => (
+													<Link
+														key={item.name}
+														href={`/artist/${encodeURIComponent(item.name)}`}
+														className="px-3 py-1.5 rounded-md text-sm bg-card border border-white/10 hover:border-primary/50 hover:text-primary transition-all shadow-sm"
+													>
+														{item.name}
+													</Link>
+												))}
+											</div>
+										</div>
+									))}
+								</div>
+							)}
 						</div>
 					</div>
 				</motion.div>
@@ -330,7 +357,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 								. Click on nodes to navigate.
 							</p>
 						</div>
-						<div className="flex items-center gap-2 text-xs text-muted-foreground bg-white/5 px-4 py-2 rounded-full border border-white/10">
+						<div className="flex items-center gap-2 text-xs text-muted-foreground bg-white/5 px-4 py-2 rounded-full border border-white/10 w-fit">
 							<span className="w-2 h-2 rounded-full bg-[#D4AF37]" /> Artist
 							<span className="w-2 h-2 rounded-full bg-[#ededed] ml-2" />{" "}
 							Artwork
@@ -338,7 +365,7 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 					</motion.div>
 
 					<motion.div
-						className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/50 h-[600px] relative"
+						className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/50 h-[400px] md:h-[600px] relative"
 						variants={itemVariants}
 					>
 						<GraphViz data={graphData} />

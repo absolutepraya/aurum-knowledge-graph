@@ -79,7 +79,7 @@ export default function ChatPage() {
 	];
 
 	return (
-		<div className="flex flex-col h-screen max-w-2xl mx-auto px-4 pt-24 pb-6">
+		<div className="flex flex-col h-screen max-w-2xl mx-auto px-4 pt-20 md:pt-24 pb-4 md:pb-6">
 			<div className="flex-1 overflow-y-auto space-y-6 scrollbar-hide">
 				{messages.length === 0 && (
 					<motion.div
@@ -106,7 +106,7 @@ export default function ChatPage() {
 						</motion.div>
 
 						<motion.div
-							className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg pt-4"
+							className="grid grid-cols-1 gap-3 w-full max-w-lg pt-4"
 							variants={itemVariants}
 						>
 							{suggestions.map((s) => (
@@ -188,7 +188,7 @@ export default function ChatPage() {
 					className="relative flex items-center group"
 				>
 					<input
-						className="w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl pl-6 pr-14 py-4 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/30 focus:bg-white/10 transition-all placeholder:text-muted-foreground/50"
+						className="w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl pl-4 md:pl-6 pr-12 md:pr-14 py-3 md:py-4 text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/30 focus:bg-white/10 transition-all placeholder:text-muted-foreground/50"
 						value={input || ""}
 						onChange={_handleInputChange}
 						placeholder="Ask about an artist or artwork..."
