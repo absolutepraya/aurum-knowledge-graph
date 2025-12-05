@@ -11,6 +11,7 @@ import {
 	Sparkles,
 	ListFilter,
 	ArrowDownNarrowWide,
+	ArrowRight,
 } from "lucide-react";
 
 import { Suspense } from "react";
@@ -81,7 +82,7 @@ function SearchContent() {
 
 	return (
 		<motion.div
-			className="w-full max-w-5xl relative z-10 px-6 pt-52 pb-16 flex flex-col items-center"
+			className="w-full max-w-5xl relative z-10 px-4 md:px-6 pt-32 md:pt-52 pb-16 flex flex-col items-center"
 			initial="hidden"
 			animate="visible"
 			variants={containerVariants}
@@ -110,31 +111,39 @@ function SearchContent() {
 				<div className="relative group">
 					<div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
 					<div className="relative flex items-center bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5 focus-within:ring-primary/50 transition-all pr-1 py-0.5">
-						<Search className="absolute left-5.5 w-6 h-6 text-muted-foreground" />
+						<Search className="absolute left-4 md:left-5.5 w-5 h-5 md:w-6 md:h-6 text-muted-foreground" />
 						<input
 							type="text"
 							value={query}
 							onChange={(e) => setQuery(e.target.value)}
-							placeholder="Search for 'Van Gogh', 'Impressionism'..."
-							className="flex-1 bg-transparent pl-16 pr-6 py-5 text-lg text-foreground placeholder:text-muted-foreground/50 outline-none"
+							placeholder="Search for 'Van Gogh'..."
+							className="flex-1 bg-transparent pl-12 md:pl-16 pr-4 md:pr-6 py-4 md:py-5 text-base md:text-lg text-foreground placeholder:text-muted-foreground/50 outline-none"
 						/>
 						<button
 							type="submit"
 							disabled={isLoading}
-							className="px-8 py-5 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors border-l border-white/5 rounded-xl"
+							className="px-6 md:px-8 py-4 md:py-5 bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors border-l border-white/5 rounded-xl text-sm md:text-base"
 						>
 							{isLoading ? (
-								<span className="animate-pulse">Searching...</span>
+								<>
+									<span className="hidden md:inline animate-pulse">
+										Searching...
+									</span>
+									<ArrowRight className="md:hidden w-5 h-5 animate-pulse" />
+								</>
 							) : (
-								"Search"
+								<>
+									<span className="hidden md:inline">Search</span>
+									<ArrowRight className="md:hidden w-5 h-5" />
+								</>
 							)}
 						</button>
 					</div>
 				</div>
 
 				{/* Filters & Options */}
-				<div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 px-2">
-					<div className="flex items-center gap-4">
+				<div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 px-2 w-full">
+					<div className="flex flex-col sm:flex-row items-center gap-2 md:gap-4 w-full md:w-auto">
 						{/* Filter Dropdown */}
 						<div className="flex items-center gap-2 bg-card/30 backdrop-blur-md border border-white/10 rounded-lg p-1 pl-3">
 							<ListFilter className="w-4 h-4 text-muted-foreground" />
@@ -207,7 +216,7 @@ function SearchContent() {
 			{/* Results Grid */}
 			<motion.div
 				key={JSON.stringify(results)} // Force re-render to trigger stagger
-				className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+				className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 -mt-10"
 				variants={containerVariants}
 				initial="hidden"
 				animate="visible"

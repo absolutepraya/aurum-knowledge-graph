@@ -34,6 +34,7 @@ export default function ArtworkCard({ work, placeholder }: ArtworkCardProps) {
 			className="break-inside-avoid group relative bg-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 block"
 		>
 			<div className="relative">
+				{/** biome-ignore lint/performance/noImgElement: <X> */}
 				<img
 					src={work.url || placeholder}
 					alt={work.title}
@@ -45,16 +46,12 @@ export default function ArtworkCard({ work, placeholder }: ArtworkCardProps) {
 						}
 					}}
 				/>
-				<div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+				<div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
 					<h3 className="text-xl font-bold text-white mb-1 font-serif">
 						{normalizedTitle}
 					</h3>
 					<p className="text-sm text-gray-300 line-clamp-2">{normalizedInfo}</p>
 				</div>
-			</div>
-			<div className="p-4 bg-card border-t border-white/5 lg:hidden">
-				<h3 className="font-bold text-foreground">{normalizedTitle}</h3>
-				<p className="text-xs text-muted-foreground mt-1">{normalizedInfo}</p>
 			</div>
 		</Link>
 	);
