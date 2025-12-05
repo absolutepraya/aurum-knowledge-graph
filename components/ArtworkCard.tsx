@@ -34,6 +34,7 @@ export default function ArtworkCard({ work, placeholder }: ArtworkCardProps) {
 			className="break-inside-avoid group relative bg-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 block"
 		>
 			<div className="relative">
+				{/** biome-ignore lint/performance/noImgElement: <X> */}
 				<img
 					src={work.url || placeholder}
 					alt={work.title}

@@ -58,7 +58,13 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 		{ title: "Influenced", items: artist.influences },
 		{ title: "Mentors", items: artist.mentors },
 		{ title: "Students", items: artist.students },
-	].filter((section) => section.items.length > 0);
+	];
+	const hasAnyRelations = relationSections.some(
+		(section) => section.items.length > 0,
+	);
+	const nonEmptyRelationSections = relationSections.filter(
+		(section) => section.items.length > 0,
+	);
 	const artworksPerPage = 15;
 	const totalArtworks = artist.artworks.length;
 	const totalPages = Math.max(1, Math.ceil(totalArtworks / artworksPerPage));
@@ -112,8 +118,8 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 						>
 							{/* Artist Image */}
 							{artist.image && (
-								<div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
-									<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+								<div className="relative aspect-3/4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+									<div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent z-10" />
 									{/** biome-ignore lint/performance/noImgElement: <x> */}
 									<img
 										src={artist.image}
@@ -129,12 +135,12 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							)}
 
 							{/* Connections (Moved from Right Column) - Desktop Only */}
-							{relationSections.length > 0 && (
-								<div className="space-y-6 hidden lg:block">
-									<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
-										Connections
-									</h3>
-									{relationSections.map((section) => (
+							<div className="space-y-6 hidden lg:block">
+								<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
+									Connections
+								</h3>
+								{hasAnyRelations ? (
+									nonEmptyRelationSections.map((section) => (
 										<div key={section.title}>
 											<p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-bold">
 												{section.title}
@@ -151,9 +157,13 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 												))}
 											</div>
 										</div>
-									))}
-								</div>
-							)}
+									))
+								) : (
+									<p className="text-sm text-muted-foreground italic">
+										No connections available for this artist.
+									</p>
+								)}
+							</div>
 						</motion.div>
 
 						{/* Right Column: Bio & Details */}
@@ -240,12 +250,12 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 							</motion.div>
 
 							{/* Connections (Mobile Only - Swapped Order) */}
-							{relationSections.length > 0 && (
-								<div className="space-y-6 mt-8 lg:hidden">
-									<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
-										Connections
-									</h3>
-									{relationSections.map((section) => (
+							<div className="space-y-6 mt-8 lg:hidden">
+								<h3 className="text-xl font-serif font-bold text-foreground border-b border-white/10 pb-4">
+									Connections
+								</h3>
+								{hasAnyRelations ? (
+									nonEmptyRelationSections.map((section) => (
 										<div key={section.title}>
 											<p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-bold">
 												{section.title}
@@ -262,9 +272,13 @@ export default async function ArtistPage({ params, searchParams }: PageProps) {
 												))}
 											</div>
 										</div>
-									))}
-								</div>
-							)}
+									))
+								) : (
+									<p className="text-sm text-muted-foreground italic">
+										No connections available for this artist.
+									</p>
+								)}
+							</div>
 						</div>
 					</div>
 				</motion.div>
