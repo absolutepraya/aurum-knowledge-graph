@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
+@source "../node_modules/streamdown/dist/*.js";
 
 :root {
   /* Modern Luxury Palette */
@@ -66,4 +67,24 @@ body {
 /* Utility for serif headings */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif), serif;
+}
+
+[data-streamdown] ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+[data-streamdown] ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+[data-streamdown] li {
+  margin: 0.25rem 0;
+}
+
+[data-streamdown] strong {
+  font-weight: 600;
 }

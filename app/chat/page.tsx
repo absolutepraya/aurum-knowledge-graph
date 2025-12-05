@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import ReactMarkdown from "react-markdown";
+import { Streamdown } from "streamdown";
 import { Send, Bot } from "lucide-react";
 import {
 	type ChangeEvent,
@@ -148,7 +148,9 @@ export default function ChatPage() {
 							}`}
 						>
 							<div className="prose prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
-								<ReactMarkdown>{_getMessageText(m)}</ReactMarkdown>
+								<Streamdown mode="static" parseIncompleteMarkdown>
+									{_getMessageText(m)}
+								</Streamdown>
 							</div>
 						</div>
 					</motion.div>
