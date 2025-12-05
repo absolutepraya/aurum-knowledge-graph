@@ -240,54 +240,49 @@ async function connectRelation(
 }
 
 async function syncWikidata(session: Session, name: string) {
-	const match = await fetchWikidataId(name);
-	if (!match) {
-		console.warn(
-			`⚠️  No Wikidata match for ${name} (Setting id to 'Not Found')`,
-		);
+	try {
+		const match = await fetchWikidataId(name);
+
+		if (!match) {
+			console.warn(`⚠️  No Wikidata match for ${name} (Marking complete)`);
+			await session.run(
+				`MATCH (a:Artist {name: $name}) 
+                 SET a.wikidata_id = 'Not Found', 
+                     a.wikidata_last_sync = datetime()`,
+				{ name },
+			);
+			return;
+		}
+
+		const imageUrl = await fetchArtistImage(match.id);
+
+		const imageValue = imageUrl || "Not Found";
+
+		await updateArtistWikidata(session, name, match, imageValue);
+
+		// Logging
+		if (imageUrl) {
+			console.log(`✓ Linked ${name} -> ${match.id} (with Image 📸)`);
+		} else {
+			console.log(`✓ Linked ${name} -> ${match.id} (No Image found)`);
+		}
+
+		const relations = await fetchRelations(match.id);
+		for (const relation of relations) {
+			await ensureRelatedArtist(session, relation);
+			await connectRelation(session, match.id, relation);
+			// Minimal log
+			if (relations.length > 0) process.stdout.write(".");
+		}
+		if (relations.length > 0) console.log("");
+
 		await session.run(
-			`MATCH (a:Artist {name: $name}) SET a.wikidata_id = 'Not Found'`,
+			"MATCH (a:Artist {name: $name}) SET a.wikidata_last_sync = datetime()",
 			{ name },
 		);
-		return;
+	} catch (error) {
+		console.error(`❌ Error processing ${name}:`, error);
 	}
-
-	const imageUrl = await fetchArtistImage(match.id);
-	const imageValueToSave = imageUrl ? imageUrl : "Not Found";
-
-	await session.run(
-		`
-        MATCH (a:Artist {name: $name})
-        SET a.wikidata_id = $id,
-            a.wikidata_label = coalesce(a.wikidata_label, $label),
-            a.image = $image 
-        `,
-		{
-			name,
-			id: match.id,
-			label: match.label,
-			image: imageValueToSave,
-		},
-	);
-
-	if (imageUrl) {
-		console.log(`✓ Linked ${name} -> ${match.id} (with Image 📸)`);
-	} else {
-		console.log(`✓ Linked ${name} -> ${match.id} (No Image found)`);
-	}
-
-	const relations = await fetchRelations(match.id);
-	for (const relation of relations) {
-		await ensureRelatedArtist(session, relation);
-		await connectRelation(session, match.id, relation);
-		// Minimal log
-		if (relations.length > 0) process.stdout.write(".");
-	}
-	if (relations.length > 0) console.log("");
-	await session.run(
-		"MATCH (a:Artist {name: $name}) SET a.wikidata_last_sync = datetime()",
-		{ name },
-	);
 }
 
 //deduplication cleaning
