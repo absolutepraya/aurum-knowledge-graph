@@ -52,24 +52,20 @@ async function runSparql(query: string) {
 function generateNameVariations(name: string): string[] {
 	const sanitized = name.replace(/"/g, "").trim();
 	const variations = new Set<string>([sanitized]);
-
 	const words = sanitized.split(/\s+/);
 	if (words.length > 1) {
 		const reversed = [...words].reverse().join(" ");
 		variations.add(reversed);
-
 		const lastWord = words[words.length - 1];
 		const firstWords = words.slice(0, -1).join(" ");
 		if (lastWord && firstWords) {
 			variations.add(`${lastWord}, ${firstWords}`);
 		}
 	}
-
 	const withoutThe = sanitized.replace(/\bthe\b/gi, "").trim();
 	if (withoutThe !== sanitized && withoutThe.length > 0) {
 		variations.add(withoutThe);
 	}
-
 	return Array.from(variations);
 }
 
@@ -77,7 +73,6 @@ async function fetchWikidataId(
 	artistName: string,
 ): Promise<WikidataMatch | null> {
 	const variations = generateNameVariations(artistName);
-
 	for (let i = 0; i < variations.length; i++) {
 		const searchTerm = variations[i];
 		const url = wbk.searchEntities({
@@ -87,16 +82,11 @@ async function fetchWikidataId(
 		});
 
 		const response = await fetch(url, {
-			headers: {
-				Accept: "application/json",
-				"User-Agent": USER_AGENT,
-			},
+			headers: { Accept: "application/json", "User-Agent": USER_AGENT },
 		});
 
 		if (!response.ok) {
-			if (i < variations.length - 1) {
-				await delay(FETCH_DELAY_MS);
-			}
+			if (i < variations.length - 1) await delay(FETCH_DELAY_MS);
 			continue;
 		}
 
@@ -104,30 +94,15 @@ async function fetchWikidataId(
 		const results = data?.search ?? [];
 		if (results.length > 0) {
 			const bestMatch = results[0];
-			const id = bestMatch.id;
-			const label = bestMatch.label || searchTerm;
-
-			if (id) {
-				return { id, label };
-			}
+			return { id: bestMatch.id, label: bestMatch.label || searchTerm };
 		}
-
-		if (i < variations.length - 1) {
-			await delay(FETCH_DELAY_MS);
-		}
+		if (i < variations.length - 1) await delay(FETCH_DELAY_MS);
 	}
-
 	return null;
 }
 
 async function fetchArtistImage(qid: string): Promise<string | null> {
-	const query = `
-      SELECT ?image WHERE {
-        wd:${qid} wdt:P18 ?image .
-      }
-      LIMIT 1
-    `;
-
+	const query = `SELECT ?image WHERE { wd:${qid} wdt:P18 ?image . } LIMIT 1`;
 	try {
 		const data = await runSparql(query);
 		const bindings = data?.results?.bindings || [];
@@ -152,6 +127,7 @@ async function fetchRelations(qid: string): Promise<RelationResult[]> {
         SELECT ?related ?relatedLabel WHERE {
           VALUES ?subject { wd:${qid} }
           ?subject wdt:${prop} ?related .
+          ?related wdt:P31 wd:Q5 . 
           SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
         }
         LIMIT ${RELATION_LIMIT}
@@ -160,15 +136,11 @@ async function fetchRelations(qid: string): Promise<RelationResult[]> {
 		try {
 			const data = await runSparql(query);
 			const bindings = data?.results?.bindings || [];
-
 			for (const binding of bindings) {
 				const relatedUri = binding.related?.value;
 				const relatedLabel = binding.relatedLabel?.value;
-
 				if (!relatedUri) continue;
-
 				const id = relatedUri.split("/").pop();
-
 				if (!id || !/^Q\d+$/.test(id)) continue;
 
 				all.push({
@@ -188,16 +160,8 @@ async function fetchArtistsWithoutId(session: Session): Promise<string[]> {
 	const result = await session.run(
 		`
       MATCH (a:Artist)
-      WHERE 
-        a.wikidata_id IS NULL 
-        OR 
-        (
-            a.wikidata_id IS NOT NULL 
-            AND a.wikidata_id <> 'Not Found'
-            AND (
-                a.image IS NULL
-            )
-        )
+      WHERE a.wikidata_last_sync IS NULL
+      
       RETURN a.name AS name
       LIMIT $limit
     `,
@@ -231,15 +195,31 @@ async function updateArtistWikidata(
 async function ensureRelatedArtist(session: Session, related: RelationResult) {
 	await session.run(
 		`
-      MERGE (a:Artist {wikidata_id: $id})
-      ON CREATE SET a.name = $label
-      SET a.name = coalesce(a.name, $label),
-          a.wikidata_label = coalesce(a.wikidata_label, $label)
-    `,
-		{
-			id: related.id,
-			label: related.label,
-		},
+        OPTIONAL MATCH (byId:Artist {wikidata_id: $id})
+        OPTIONAL MATCH (byName:Artist {name: $label})
+        WITH coalesce(byId, byName) as existingNode
+        
+        CALL {
+            WITH existingNode
+            WITH existingNode WHERE existingNode IS NOT NULL
+            SET existingNode.wikidata_id = $id,
+                existingNode.wikidata_label = coalesce(existingNode.wikidata_label, $label)
+            RETURN existingNode as result
+            
+            UNION
+            
+            WITH existingNode
+            WITH existingNode WHERE existingNode IS NULL
+            CREATE (newNode:Artist {
+                wikidata_id: $id, 
+                name: $label, 
+                wikidata_label: $label
+            })
+            RETURN newNode as result
+        }
+        RETURN count(result)
+        `,
+		{ id: related.id, label: related.label },
 	);
 }
 
@@ -255,10 +235,7 @@ async function connectRelation(
       MERGE (source)-[r:${related.type}]->(target)
       RETURN r
     `,
-		{
-			sourceId,
-			targetId: related.id,
-		},
+		{ sourceId, targetId: related.id },
 	);
 }
 
@@ -268,7 +245,6 @@ async function syncWikidata(session: Session, name: string) {
 		console.warn(
 			`⚠️  No Wikidata match for ${name} (Setting id to 'Not Found')`,
 		);
-
 		await session.run(
 			`MATCH (a:Artist {name: $name}) SET a.wikidata_id = 'Not Found'`,
 			{ name },
@@ -294,7 +270,6 @@ async function syncWikidata(session: Session, name: string) {
 		},
 	);
 
-	// Logging
 	if (imageUrl) {
 		console.log(`✓ Linked ${name} -> ${match.id} (with Image 📸)`);
 	} else {
@@ -305,7 +280,59 @@ async function syncWikidata(session: Session, name: string) {
 	for (const relation of relations) {
 		await ensureRelatedArtist(session, relation);
 		await connectRelation(session, match.id, relation);
-		console.log(`   • ${relation.type} -> ${relation.label}`);
+		// Minimal log
+		if (relations.length > 0) process.stdout.write(".");
+	}
+	if (relations.length > 0) console.log("");
+	await session.run(
+		"MATCH (a:Artist {name: $name}) SET a.wikidata_last_sync = datetime()",
+		{ name },
+	);
+}
+
+//deduplication cleaning
+async function performFinalDeduplication(session: Session) {
+	console.log("🧹 Running auto-deduplication to clean up duplicates...");
+	const query = `
+        MATCH (a:Artist)
+        WHERE a.wikidata_id IS NOT NULL AND a.wikidata_id <> 'Not Found'
+        WITH a.wikidata_id as id, collect(a) as nodes
+        WHERE size(nodes) > 1
+
+        CALL {
+            WITH nodes
+            UNWIND nodes as n
+            OPTIONAL MATCH (n)-[:CREATED]->(w:Artwork)
+            WITH n, count(w) as artworkCount
+            ORDER BY artworkCount DESC, n.wikipedia DESC, size(keys(n)) DESC
+            RETURN collect(n) as sortedNodes
+        }
+
+        WITH head(sortedNodes) as primary, tail(sortedNodes) as duplicates
+        UNWIND duplicates as duplicate
+
+        SET primary.wikipedia = COALESCE(primary.wikipedia, duplicate.wikipedia),
+            primary.image = COALESCE(primary.image, duplicate.image),
+            primary.bio = COALESCE(primary.bio, duplicate.bio),
+            primary.nationality = COALESCE(primary.nationality, duplicate.nationality),
+            primary.wikidata_label = COALESCE(primary.wikidata_label, duplicate.wikidata_label)
+
+        WITH primary, duplicate
+        OPTIONAL MATCH (duplicate)-[r1:INFLUENCED_BY]->(target)
+        FOREACH (_ IN CASE WHEN r1 IS NOT NULL THEN [1] ELSE [] END | MERGE (primary)-[:INFLUENCED_BY]->(target) DELETE r1)
+
+        WITH primary, duplicate
+        OPTIONAL MATCH (duplicate)-[r2:STUDENT_OF]->(target2)
+        FOREACH (_ IN CASE WHEN r2 IS NOT NULL THEN [1] ELSE [] END | MERGE (primary)-[:STUDENT_OF]->(target2) DELETE r2)
+
+        DETACH DELETE duplicate
+    `;
+
+	try {
+		await session.run(query);
+		console.log("✨ Deduplication complete. Database is clean.");
+	} catch (error) {
+		console.error("⚠️ Deduplication warning:", error);
 	}
 }
 
@@ -334,6 +361,9 @@ async function main() {
 				}
 			}
 		}
+
+		//run deduplikasi
+		await performFinalDeduplication(session);
 	} finally {
 		await session.close();
 		await driver.close();
